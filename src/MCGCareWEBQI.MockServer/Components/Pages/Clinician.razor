@@ -1,0 +1,172 @@
+@page "/clinician/{SessionId:guid}"
+@rendermode InteractiveServer
+@inject McgSessionStore Store
+@inject NavigationManager Nav
+
+<PageTitle>CareWebQI &mdash; Episode @(_session?.EpisodeId ?? "")</PageTitle>
+
+@if (_session is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-6">
+        <strong>Session not found.</strong> The clinician session @SessionId may have expired.
+    </MudAlert>
+}
+else if (_session.Exited)
+{
+    <MudAlert Severity="Severity.Info" Class="mt-6">Episode already exited.</MudAlert>
+}
+else
+{
+    <MudGrid Spacing="3" Class="mt-2">
+        <!-- Episode + Patient summary header -->
+        <MudItem xs="12">
+            <MudCard Elevation="2">
+                <MudCardContent>
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12" md="4">
+                            <MudText Typo="Typo.overline">Episode</MudText>
+                            <MudText Typo="Typo.h6">@_session.EpisodeId</MudText>
+                            <MudText Typo="Typo.body2">@_session.RequestType @(_session.EpisodeType is null ? "" : $"· {_session.EpisodeType}")</MudText>
+                            @if (!string.IsNullOrEmpty(_session.EpisodeAdmitDate))
+                            {
+                                <MudText Typo="Typo.body2">Admit: @_session.EpisodeAdmitDate</MudText>
+                            }
+                        </MudItem>
+                        <MudItem xs="12" md="5">
+                            <MudText Typo="Typo.overline">Patient</MudText>
+                            <MudText Typo="Typo.h6">
+                                @(string.IsNullOrEmpty(_session.PatientFirstName)
+                                    ? "(no name)"
+                                    : $"{_session.PatientLastName}, {_session.PatientFirstName}")
+                            </MudText>
+                            <MudText Typo="Typo.body2">
+                                @(_session.PatientId)
+                                @(_session.PatientGender is null ? "" : $" · {_session.PatientGender}")
+                                @(_session.PatientDob is null ? "" : $" · DOB {_session.PatientDob}")
+                            </MudText>
+                        </MudItem>
+                        <MudItem xs="12" md="3">
+                            <MudText Typo="Typo.overline">Documenting user</MudText>
+                            <MudText Typo="Typo.h6">@_session.DocumentingUser</MudText>
+                            @if (!string.IsNullOrEmpty(_session.EpisodeCodes))
+                            {
+                                <MudText Typo="Typo.body2">Codes: @_session.EpisodeCodes</MudText>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Criteria checklist -->
+        <MudItem xs="12" md="8">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Care criteria</MudText>
+                        <MudText Typo="Typo.caption">Mark each item Met / Not Met / Discussed. Add notes as needed.</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    @foreach (var (criterion, idx) in _session.Criteria.Select((c, i) => (c, i)))
+                    {
+                        <MudPaper Elevation="0" Outlined="true" Class="pa-3 mb-3">
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" md="6">
+                                    <MudText Typo="Typo.body1">@criterion.Description</MudText>
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudButtonGroup OverrideStyles="false">
+                                        <MudButton Color="@(criterion.Status == CriterionStatus.Met        ? Color.Success : Color.Default)"
+                                                   Variant="@(criterion.Status == CriterionStatus.Met        ? Variant.Filled : Variant.Outlined)"
+                                                   OnClick="@(() => SetStatus(idx, CriterionStatus.Met))">
+                                            Met
+                                        </MudButton>
+                                        <MudButton Color="@(criterion.Status == CriterionStatus.NotMet     ? Color.Error : Color.Default)"
+                                                   Variant="@(criterion.Status == CriterionStatus.NotMet     ? Variant.Filled : Variant.Outlined)"
+                                                   OnClick="@(() => SetStatus(idx, CriterionStatus.NotMet))">
+                                            Not Met
+                                        </MudButton>
+                                        <MudButton Color="@(criterion.Status == CriterionStatus.Discussed ? Color.Info : Color.Default)"
+                                                   Variant="@(criterion.Status == CriterionStatus.Discussed ? Variant.Filled : Variant.Outlined)"
+                                                   OnClick="@(() => SetStatus(idx, CriterionStatus.Discussed))">
+                                            Discussed
+                                        </MudButton>
+                                    </MudButtonGroup>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField T="string"
+                                                  Value="@criterion.Note"
+                                                  ValueChanged="@(v => SetNote(idx, v))"
+                                                  Label="Note (optional)"
+                                                  Variant="Variant.Text"
+                                                  Lines="1" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    }
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- Episode notes + Exit -->
+        <MudItem xs="12" md="4">
+            <MudCard Elevation="2">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">Episode notes</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTextField T="string"
+                                  @bind-Value="_session.ClinicalNotes"
+                                  Lines="6"
+                                  Variant="Variant.Outlined"
+                                  Placeholder="Free-text clinical notes for this episode..." />
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               StartIcon="@Icons.Material.Filled.ExitToApp"
+                               FullWidth="true"
+                               OnClick="ExitEpisode">
+                        Exit Episode
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+
+    private McgMockSession? _session;
+
+    protected override void OnInitialized()
+    {
+        _session = Store.Get(SessionId);
+    }
+
+    private void SetStatus(int idx, CriterionStatus status)
+    {
+        if (_session is null) return;
+        _session.Criteria[idx].Status = status;
+        Store.Save(_session);
+    }
+
+    private void SetNote(int idx, string note)
+    {
+        if (_session is null) return;
+        _session.Criteria[idx].Note = note ?? "";
+        Store.Save(_session);
+    }
+
+    private void ExitEpisode()
+    {
+        if (_session is null) return;
+        _session.Exited = true;
+        Store.Save(_session);
+        Nav.NavigateTo($"/exit/{_session.SessionId}", forceLoad: true);
+    }
+}

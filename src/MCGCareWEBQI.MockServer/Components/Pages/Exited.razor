@@ -1,0 +1,44 @@
+@page "/exit/{SessionId:guid}"
+@inject McgSessionStore Store
+
+<PageTitle>CareWebQI &mdash; posting episode summary</PageTitle>
+
+@if (_session is null)
+{
+    <MudAlert Severity="Severity.Error">Session @SessionId not found.</MudAlert>
+}
+else if (string.IsNullOrEmpty(_session.ReturnUrl))
+{
+    <MudAlert Severity="Severity.Warning" Class="mt-4">
+        <strong>No returnUrl in session.</strong> Cannot post the episode summary anywhere.
+    </MudAlert>
+    <MudExpansionPanels Class="mt-4">
+        <MudExpansionPanel Text="View generated CwqiMessage">
+            <pre style="white-space: pre-wrap; word-break: break-all;">@_xml</pre>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+}
+else
+{
+    <MudAlert Severity="Severity.Success" Class="mt-4">
+        Posting episode summary back to <code>@_session.ReturnUrl</code> &hellip;
+    </MudAlert>
+
+    <form id="cwqi-post" method="POST" action="@_session.ReturnUrl" target="_self">
+        <input type="hidden" name="cwqiresponse" value="@_xml" />
+    </form>
+    <script>setTimeout(() => document.getElementById('cwqi-post').submit(), 250);</script>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+
+    private McgMockSession? _session;
+    private string _xml = "";
+
+    protected override void OnInitialized()
+    {
+        _session = Store.Get(SessionId);
+        if (_session is not null) _xml = CwqiResponseBuilder.Build(_session);
+    }
+}
