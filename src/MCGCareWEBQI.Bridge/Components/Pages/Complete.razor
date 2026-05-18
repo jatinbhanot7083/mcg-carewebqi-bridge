@@ -1,0 +1,78 @@
+@page "/complete/{TxnId:guid}"
+@inject IntegrationService Integration
+@inject Microsoft.Extensions.Options.IOptions<BridgeOptions> BridgeOpts
+
+<PageTitle>CareWebQI &mdash; complete</PageTitle>
+
+@if (_result is null)
+{
+    <MudAlert Severity="Severity.Warning" Class="mt-6">Transaction @TxnId not found.</MudAlert>
+}
+else
+{
+    <MudCard Class="mt-6" Elevation="2">
+        <MudCardContent>
+            <MudText Typo="Typo.h5" Class="mb-3">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="@(_result.Status == "Failed" ? Color.Error : Color.Success)" />
+                Episode @(_result.Status == "Failed" ? "failed" : "completed")
+            </MudText>
+            <MudText>Status: <strong>@_result.Status</strong></MudText>
+            @if (_result.McgResponse is not null)
+            {
+                <MudText>Episode ID: <code>@_result.McgResponse.EpisodeId</code></MudText>
+            }
+            @if (!string.IsNullOrEmpty(_result.FailureReason))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-3" Dense="true">@_result.FailureReason</MudAlert>
+            }
+            <MudText Typo="Typo.body2" Class="mt-3">
+                The result has been delivered to the calling application. This window will close automatically.
+            </MudText>
+        </MudCardContent>
+    </MudCard>
+
+    <script>
+      (function () {
+        try {
+          var payload = @PayloadJson;
+          if (window.opener && !window.opener.closed) {
+            var origins = @AllowedOriginsJson;
+            origins.forEach(function (o) {
+              try { window.opener.postMessage({ source: 'mcg-bridge', payload: payload }, o); }
+              catch (e) { /* ignore */ }
+            });
+          }
+        } catch (e) { console.warn('postMessage failed', e); }
+
+        @if (BridgeOpts.Value.AutoCloseOnComplete)
+        {
+            <text>setTimeout(function () { try { window.close(); } catch (e) {} }, 1500);</text>
+        }
+      })();
+    </script>
+}
+
+@code {
+    [Parameter] public Guid TxnId { get; set; }
+
+    private MCGCareWEBQI.Shared.Models.Result.IntegrationResult? _result;
+
+    private string PayloadJson => _result is null
+        ? "null"
+        : System.Text.Json.JsonSerializer.Serialize(_result);
+
+    private string AllowedOriginsJson
+    {
+        get
+        {
+            var origins = (BridgeOpts.Value.AllowedCallerOrigins ?? "*")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            return System.Text.Json.JsonSerializer.Serialize(origins);
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _result = await Integration.GetResultAsync(TxnId);
+    }
+}

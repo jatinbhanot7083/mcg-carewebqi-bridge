@@ -1,0 +1,106 @@
+@page "/launch"
+@inject IntegrationService Integration
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpCtx
+@inject NavigationManager Nav
+
+<PageTitle>Opening CareWebQI &hellip;</PageTitle>
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-6">
+        <strong>Launch failed.</strong> @_error
+    </MudAlert>
+}
+else if (_fields is null)
+{
+    <MudPaper Class="pa-6 mt-6" Elevation="2">
+        <MudText Typo="Typo.h6">Preparing MCG documentation session&hellip;</MudText>
+        <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+    </MudPaper>
+}
+else
+{
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="my-6">
+        Redirecting to CareWebQI&hellip; (if your browser does not redirect automatically, click Continue.)
+    </MudText>
+
+    <form id="cwqi-launch" method="POST" action="@_interfaceLoginUrl" target="_self">
+        @foreach (var kv in _fields)
+        {
+            <input type="hidden" name="@kv.Key" value="@kv.Value" />
+        }
+        <div style="text-align:center;">
+            <button type="submit">Continue to CareWebQI</button>
+        </div>
+    </form>
+    <script>setTimeout(() => document.getElementById('cwqi-launch').submit(), 150);</script>
+}
+
+@code {
+    [SupplyParameterFromQuery] public string? CallerId { get; set; }
+    [SupplyParameterFromQuery] public string? CallerTxnId { get; set; }
+    [SupplyParameterFromQuery] public string? RequestType { get; set; }
+    [SupplyParameterFromQuery] public string? ReturnContext { get; set; }
+    [SupplyParameterFromQuery] public string? CallbackUrl { get; set; }
+
+    [SupplyParameterFromQuery] public string? EpisodeId { get; set; }
+    [SupplyParameterFromQuery] public string? EpisodeType { get; set; }
+    [SupplyParameterFromQuery] public string? EpisodeAdmitDate { get; set; }
+    [SupplyParameterFromQuery] public string? EpisodeCodes { get; set; }
+
+    [SupplyParameterFromQuery] public string? PatientId { get; set; }
+    [SupplyParameterFromQuery] public string? PatientFirstName { get; set; }
+    [SupplyParameterFromQuery] public string? PatientLastName { get; set; }
+    [SupplyParameterFromQuery] public string? PatientDateOfBirth { get; set; }
+    [SupplyParameterFromQuery] public string? PatientGender { get; set; }
+
+    [SupplyParameterFromQuery] public string? FacilityId { get; set; }
+    [SupplyParameterFromQuery] public string? FacilityName { get; set; }
+
+    [SupplyParameterFromQuery] public string? DocumentingUser { get; set; }
+
+    private IReadOnlyList<KeyValuePair<string, string>>? _fields;
+    private string _interfaceLoginUrl = "";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(CallerId) || string.IsNullOrEmpty(CallerTxnId))
+        {
+            _error = "Missing required callerId or callerTxnId on the launch URL.";
+            return;
+        }
+
+        var launch = new LaunchRequest
+        {
+            CallerId          = CallerId,
+            CallerTxnId       = CallerTxnId,
+            RequestType       = RequestType,
+            ReturnContext     = ReturnContext,
+            CallbackUrl       = CallbackUrl,
+            EpisodeId         = EpisodeId,
+            EpisodeType       = EpisodeType,
+            EpisodeAdmitDate  = EpisodeAdmitDate,
+            EpisodeCodes      = EpisodeCodes,
+            PatientId         = PatientId,
+            PatientFirstName  = PatientFirstName,
+            PatientLastName   = PatientLastName,
+            PatientDateOfBirth = PatientDateOfBirth,
+            PatientGender     = PatientGender,
+            FacilityId        = FacilityId,
+            FacilityName      = FacilityName,
+            DocumentingUser   = DocumentingUser,
+        };
+
+        try
+        {
+            var (_, fields, url) = await Integration.InitiateAsync(launch);
+            _fields = fields;
+            _interfaceLoginUrl = url;
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

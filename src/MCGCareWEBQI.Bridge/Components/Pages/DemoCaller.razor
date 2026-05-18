@@ -1,0 +1,103 @@
+@page "/demo"
+@rendermode InteractiveServer
+
+<PageTitle>MCG Bridge demo caller</PageTitle>
+
+<MudGrid Spacing="3" Class="mt-2">
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Simulate a calling application</MudText>
+                    <MudText Typo="Typo.caption">Stands in for EvokeConnect (or any caller) so you can click through end-to-end.</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField @bind-Value="_callerId" Label="callerId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_callerTxnId" Label="callerTxnId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_patientId" Label="patientId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_patientFirstName" Label="patientFirstName" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_patientLastName"  Label="patientLastName"  Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_patientDob"       Label="patientDateOfBirth (mm/dd/yyyy)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudRadioGroup T="string" @bind-Value="_patientGender" Class="mb-2">
+                    <MudText Typo="Typo.caption" Class="d-block mb-1">patientGender</MudText>
+                    <MudRadio Value="@("Female")" Color="Color.Primary">Female</MudRadio>
+                    <MudRadio Value="@("Male")"   Color="Color.Primary">Male</MudRadio>
+                </MudRadioGroup>
+                <MudTextField @bind-Value="_episodeType"    Label="episodeType"      Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_episodeAdmit"   Label="episodeAdmitDate" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+                <MudTextField @bind-Value="_episodeCodes"   Label="episodeCodes"     Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.OpenInNew"
+                           OnClick="OpenPopup" FullWidth="true">
+                    Launch MCG popup
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudCard Elevation="2" Class="mb-3">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Launch URL</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField T="string" Value="@LaunchUrl" Lines="3" ReadOnly="true" Variant="Variant.Outlined" />
+            </MudCardContent>
+        </MudCard>
+
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Result returned by bridge</MudText>
+                    <MudText Typo="Typo.caption">Captured via <code>window.postMessage</code> from the popup.</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <pre id="demo-result" style="background:#f8f9fa; padding:1rem; min-height:8rem; max-height:24rem; overflow:auto; font-size:0.85rem; border-radius:4px;">(waiting for popup result&hellip;)</pre>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<script>
+  (function () {
+    window.addEventListener('message', function (event) {
+      if (event.data && event.data.source === 'mcg-bridge') {
+        document.getElementById('demo-result').textContent =
+            JSON.stringify(event.data.payload, null, 2);
+      }
+    });
+    window.__mcgBridgeDemoOpen = function (url) {
+      window.open(url, 'mcg-popup', 'width=1200,height=820,menubar=no,toolbar=no');
+    };
+  })();
+</script>
+
+@code {
+    private string _callerId         = "demo-caller";
+    private string _callerTxnId      = Guid.NewGuid().ToString();
+    private string _patientId        = "P-10042";
+    private string _patientFirstName = "Jane";
+    private string _patientLastName  = "Doe";
+    private string _patientDob       = "01/15/1980";
+    private string _patientGender    = "Female";
+    private string _episodeType      = "Inpatient";
+    private string _episodeAdmit     = DateTime.Today.ToString("MM/dd/yyyy");
+    private string _episodeCodes     = "I10|icd10cm";
+
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
+    private string LaunchUrl => $"/launch?{System.Net.WebUtility.UrlEncode(string.Empty)}callerId={U(_callerId)}&callerTxnId={U(_callerTxnId)}&patientId={U(_patientId)}&patientFirstName={U(_patientFirstName)}&patientLastName={U(_patientLastName)}&patientDateOfBirth={U(_patientDob)}&patientGender={U(_patientGender)}&episodeType={U(_episodeType)}&episodeAdmitDate={U(_episodeAdmit)}&episodeCodes={U(_episodeCodes)}";
+
+    private static string U(string s) => System.Net.WebUtility.UrlEncode(s ?? "");
+
+    private async Task OpenPopup()
+    {
+        if (string.IsNullOrEmpty(_callerTxnId)) _callerTxnId = Guid.NewGuid().ToString();
+        await JS.InvokeVoidAsync("__mcgBridgeDemoOpen", LaunchUrl);
+    }
+}
