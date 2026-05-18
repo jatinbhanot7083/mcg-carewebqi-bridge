@@ -8,8 +8,15 @@ using MCGCareWEBQI.MockServer.Services;
 using MCGCareWEBQI.MockServer.Services.Reconcile;
 using MCGCareWEBQI.Shared.Configuration;
 using MudBlazor.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/mockserver-.log", rollingInterval: RollingInterval.Day));
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

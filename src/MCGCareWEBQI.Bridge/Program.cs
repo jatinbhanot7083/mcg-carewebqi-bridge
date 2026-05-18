@@ -5,8 +5,15 @@ using MCGCareWEBQI.Data;
 using MCGCareWEBQI.Shared.Configuration;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/bridge-.log", rollingInterval: RollingInterval.Day));
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

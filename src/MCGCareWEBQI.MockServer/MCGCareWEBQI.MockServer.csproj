@@ -8,6 +8,7 @@
     <PackageReference Include="CoreWCF.Http" Version="1.9.0" />
     <PackageReference Include="CoreWCF.Primitives" Version="1.9.0" />
     <PackageReference Include="MudBlazor" Version="9.4.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
