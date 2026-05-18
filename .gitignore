@@ -1,0 +1,28 @@
+## .NET / VS build artifacts
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vs/
+.vscode/
+.idea/
+
+## Logs
+*.log
+logs/
+
+## Local databases
+*.mdf
+*.ldf
+*.ndf
+
+## Local config overrides
+appsettings.Local.json
+appsettings.Development.json
+
+## OS
+Thumbs.db
+.DS_Store
