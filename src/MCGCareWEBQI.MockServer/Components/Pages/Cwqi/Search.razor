@@ -1,0 +1,83 @@
+@page "/cwqi/search/{SessionId:guid}"
+@rendermode InteractiveServer
+@using MCGCareWEBQI.MockServer.Models.Cwqi
+@inject McgSessionStore Store
+@inject NavigationManager Nav
+
+<PageTitle>CareWebQI &mdash; Search Results</PageTitle>
+
+@if (_session is null)
+{
+    <div class="cwqi-card" style="max-width:560px; margin:24px auto;">
+        <div class="cwqi-card-body"><strong>Session not found.</strong></div>
+    </div>
+}
+else
+{
+    <div class="breadcrumb"><a href="@($"/cwqi/login/{SessionId}")">Home</a> &gt; Search</div>
+
+    <div style="display:flex; gap:18px; align-items:flex-end; padding:6px 0 14px 0;">
+        <div>
+            <label style="font-size:0.85rem; color:#424242;">Select Content Edition: </label>
+            <select disabled style="padding:3px 6px;"><option>MCG 28th Edition</option></select>
+        </div>
+        <a href="#" style="font-size:0.9rem;">Benchmarks and Data Website</a>
+        <div style="flex:1; text-align:right;">
+            <a href="#" style="font-size:0.9rem;">Search Again</a>
+        </div>
+    </div>
+
+    <div style="text-align:left; padding:4px 0 8px 0; font-weight:600;">
+        Results for &ldquo;@(_session.EpisodeCodes?.Split('|','$').FirstOrDefault() ?? "")&rdquo;
+        <span style="float:right; font-weight:400; color:#424242; font-size:0.9rem;">
+            <strong>1</strong> <a href="#">2</a> &nbsp;(Results 1 - @_rows.Length of 27)
+        </span>
+    </div>
+
+    <table class="cwqi-table">
+        <thead>
+            <tr>
+                <th>Guideline Code</th><th>Product</th><th>Type</th><th>Title</th>
+                <th>GLOS/MBLOS</th><th>Codes</th><th>Edition</th>
+                <th>Benchmark Statistics</th><th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in _rows)
+            {
+                <tr>
+                    <td><a href="#" @onclick="@(() => Select(row))" @onclick:preventDefault>@row.Code</a></td>
+                    <td>@row.Product</td>
+                    <td>@row.Type</td>
+                    <td>@row.Title</td>
+                    <td>@row.Glos</td>
+                    <td><a href="#" @onclick:preventDefault>View Codes</a></td>
+                    <td>@row.Edition</td>
+                    <td>@(row.HasBenchmarkStats ? new MarkupString("<a href='#'>Benchmark Statistics</a>") : new MarkupString("&nbsp;"))</td>
+                    <td><a href="#" @onclick="@(() => Select(row))" @onclick:preventDefault>Select</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+    private McgMockSession? _session;
+    private GuidelineSearchRow[] _rows = Array.Empty<GuidelineSearchRow>();
+
+    protected override void OnInitialized()
+    {
+        _session = Store.Get(SessionId);
+        _rows = MCGCareWEBQI.MockServer.Data.DiabetesM130Seed.DiabetesSearchResults();
+    }
+
+    private void Select(GuidelineSearchRow row)
+    {
+        if (_session is null) return;
+        // For the demo, only M-130 has a real criteria tree; everything else routes back to M-130.
+        _session.SelectedGuideline = MCGCareWEBQI.MockServer.Data.DiabetesM130Seed.Build();
+        Store.Save(_session);
+        Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+    }
+}

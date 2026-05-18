@@ -5,11 +5,96 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" />
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["MCGCareWEBQI.Bridge.styles.css"]" />
+    <style>
+        html, body { font-family: 'Inter', Roboto, Helvetica, Arial, sans-serif; background:#f5f7fb; }
+        code, pre { font-family: 'JetBrains Mono', Consolas, Menlo, monospace !important; }
+        .gradient-hero {
+            background: linear-gradient(135deg, #0b2545 0%, #13315c 60%, #134e4a 100%);
+            color: #f1f5f9;
+            border-radius: 12px;
+        }
+        .feature-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .feature-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(11,37,69,0.10); }
+        .status-pill {
+            display:inline-flex; align-items:center; gap:0.4rem;
+            padding:4px 10px; border-radius:999px; font-size:0.78rem; font-weight:600; line-height:1;
+        }
+        .status-pill.ok    { background:#d1fae5; color:#065f46; }
+        .status-pill.warn  { background:#fef3c7; color:#92400e; }
+        .status-pill.error { background:#fee2e2; color:#991b1b; }
+        .code-dark {
+            background:#0f172a; color:#e2e8f0; padding:14px;
+            border-radius:8px; font-size:0.80rem;
+            overflow:auto; white-space:pre-wrap; word-break:break-all; margin:0;
+        }
+        /* High-contrast primary CTA button used on Demo + Complete pages */
+        .launch-btn {
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            width:100%; padding:14px 18px; border:none; cursor:pointer;
+            background: linear-gradient(135deg, #0b2545 0%, #13315c 100%);
+            color:#ffffff !important; font-weight:600; font-size:1rem;
+            border-radius:10px; box-shadow:0 8px 20px rgba(11,37,69,0.25);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .launch-btn:hover  { transform: translateY(-1px); box-shadow:0 10px 24px rgba(11,37,69,0.30); }
+        .launch-btn:active { transform: translateY(0); }
+        .launch-btn span   { color:#ffffff !important; }
+
+        /* ---------- GuidingCare-style Decisions screen ---------- */
+        .gc-app          { display:flex; min-height:100vh; background:#fafafa; }
+        .gc-sidenav      { width:60px; background:#ffffff; border-right:1px solid #e5e7eb; padding:8px 0; }
+        .gc-sidenav .item{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 4px; color:#64748b; font-size:0.65rem; cursor:pointer; text-align:center; line-height:1.1; border-left:3px solid transparent; }
+        .gc-sidenav .item:hover { background:#f1f5f9; }
+        .gc-sidenav .item.active { color:#0b2545; border-left-color:#1565c0; background:#e3f0fa; font-weight:600; }
+        .gc-sidenav .item .material-symbols-rounded { font-size:1.3rem; }
+
+        .gc-main         { flex:1; }
+        .gc-auth-strip   { background:#0f172a; color:#cbd5e1; padding:8px 16px; display:flex; gap:24px; font-size:0.85rem; align-items:center; }
+        .gc-auth-strip strong { color:#ffffff; margin-right:6px; }
+        .gc-tabstrip     { background:#e3f0fa; border-bottom:1px solid #cfe2f3; padding:0 16px; display:flex; gap:0; }
+        .gc-tab          { padding:8px 16px; background:#ffffff; border:1px solid #cfe2f3; border-bottom:none; color:#0b2545; font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:8px; border-radius:4px 4px 0 0; margin-right:2px; }
+        .gc-tab .close   { cursor:pointer; color:#94a3b8; }
+        .gc-page         { padding:16px; }
+        .gc-card         { background:#ffffff; border:1px solid #cfe2f3; margin-bottom:14px; border-radius:4px; overflow:hidden; }
+        .gc-card-header  { background:#e3f0fa; padding:10px 14px; font-weight:600; color:#0b2545; display:flex; align-items:center; gap:10px; }
+        .gc-card-body    { padding:14px; }
+
+        table.gc-table   { width:100%; border-collapse:collapse; font-size:0.82rem; }
+        table.gc-table thead th { background:#cfe2f3; color:#0b2545; padding:7px 8px; text-align:left; font-weight:600; border-bottom:2px solid #b6d4ec; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.5px; }
+        table.gc-table tbody td { padding:6px 8px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
+        table.gc-table tbody tr.decision-row td { background:#d4f4dd; border-bottom:1px solid #a7d8b3; }
+        table.gc-table input[type=text], table.gc-table select { padding:3px 5px; font-size:0.82rem; border:1px solid #cbd5e1; border-radius:2px; max-width:120px; }
+        table.gc-table .icon-cell { color:#1565c0; cursor:pointer; }
+
+        .gc-totals       { display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; margin-top:14px; }
+        .gc-totals .chip { background:#f1f5f9; padding:6px 10px; border-radius:3px; font-size:0.78rem; color:#334155; display:flex; justify-content:space-between; gap:8px; }
+        .gc-totals .chip strong { color:#0f172a; }
+
+        .gc-tabs         { display:flex; border-bottom:1px solid #cfe2f3; margin-bottom:0; }
+        .gc-tabs .t      { padding:7px 14px; cursor:pointer; color:#64748b; font-size:0.85rem; border-bottom:2px solid transparent; }
+        .gc-tabs .t.active { color:#0b2545; border-bottom-color:#1565c0; font-weight:600; }
+
+        .gc-add-btn      { display:inline-flex; align-items:center; gap:4px; color:#1565c0; background:transparent; border:none; cursor:pointer; font-weight:600; font-size:0.85rem; padding:4px 8px; }
+        .gc-add-btn:hover { background:#e3f0fa; border-radius:3px; }
+        .gc-add-btn .material-symbols-rounded { font-size:1rem; }
+
+        .gc-status-pill  { display:inline-block; padding:2px 8px; border-radius:3px; font-size:0.72rem; font-weight:600; text-transform:uppercase; }
+        .gc-status-pill.pending { background:#fef3c7; color:#92400e; }
+        .gc-status-pill.met     { background:#d1fae5; color:#065f46; }
+        .gc-status-pill.notmet  { background:#fee2e2; color:#991b1b; }
+    </style>
     <ImportMap />
     <HeadOutlet />
 </head>

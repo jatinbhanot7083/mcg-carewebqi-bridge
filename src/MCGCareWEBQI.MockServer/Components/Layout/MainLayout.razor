@@ -1,9 +1,70 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-@Body
+<MudThemeProvider Theme="@_theme" IsDarkMode="false" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+<!-- MCG / CareWebQI brand header (white) -->
+<div class="cwqi-header">
+    <div class="cwqi-mark">
+        <svg class="leaves" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M6 34 C 8 14, 14 6, 22 4 C 14 16, 12 26, 10 34 Z" fill="#5fb15c" />
+            <path d="M14 36 C 16 18, 22 10, 30 8 C 22 20, 18 30, 16 36 Z" fill="#7fc97f" opacity="0.85" />
+            <path d="M22 38 C 24 20, 30 12, 38 10 C 30 22, 26 32, 24 38 Z" fill="#9fd99f" opacity="0.7" />
+        </svg>
+        <span class="mcg">mcg<span class="tm">TM</span></span>
+        <span class="cwqi">CareWebQI<span class="reg">&reg;</span></span>
+    </div>
+    <div class="healthedge">HEALTH<span class="edge">EDGE</span><span class="arrow">▸</span></div>
 </div>
+
+<!-- "Enter Documentation" bar -->
+<div class="enter-doc-bar">
+    <button type="button" class="enter-doc-btn">Enter Documentation</button>
+</div>
+
+<!-- Blue user-info strip -->
+<div class="user-strip">
+    <span class="mcg-mini">mcg</span>
+    User: <strong>arun.katpally@altruistahealth.com</strong>
+    &nbsp;&middot;&nbsp; <a href="#">Preferences</a>
+    &nbsp;&middot;&nbsp; <a href="#">Help</a>
+</div>
+
+<main style="min-height:60vh; padding:0 18px 24px 18px;">
+    @Body
+</main>
+
+<div class="cwqi-footer">
+    CareWebQI Version: 16.4 &nbsp; Content Version: 28.1<br/>
+    MCG Health &middot; Copyright © 2026 MCG Health, LLC &middot; All Rights Reserved.<br/>
+    CPT Copyright © 2025 American Medical Association. All rights reserved.
+</div>
+
+@code {
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary           = "#1565c0",
+            Secondary         = "#5b9bd5",
+            Background        = "#e8edf2",
+            Surface           = "#ffffff",
+            Success           = "#43a047",
+            Warning           = "#fb8c00",
+            Error             = "#e53935",
+            Info              = "#3b7cb8",
+            TextPrimary       = "#212121",
+            TextSecondary     = "#424242",
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = new[] { "Source Sans Pro", "Tahoma", "Arial", "sans-serif" } },
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "2px",
+        }
+    };
+}

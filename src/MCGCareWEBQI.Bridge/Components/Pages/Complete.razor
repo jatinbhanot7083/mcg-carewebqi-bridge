@@ -10,43 +10,84 @@
 }
 else
 {
-    <MudCard Class="mt-6" Elevation="2">
-        <MudCardContent>
-            <MudText Typo="Typo.h5" Class="mb-3">
-                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="@(_result.Status == "Failed" ? Color.Error : Color.Success)" />
-                Episode @(_result.Status == "Failed" ? "failed" : "completed")
-            </MudText>
-            <MudText>Status: <strong>@_result.Status</strong></MudText>
+    var ok = _result.Status != "Failed";
+    var bgGrad = ok
+        ? "linear-gradient(135deg,#065f46 0%,#10b981 100%)"
+        : "linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%)";
+    var icon  = ok ? Icons.Material.Filled.CheckCircleOutline : Icons.Material.Filled.ErrorOutline;
+    var headline = ok ? "Episode completed" : "Episode failed";
+    var subline  = ok ? "Result delivered to the calling application." : (_result.FailureReason ?? "MCG returned an error.");
+
+    <div class="pa-8 mt-4" style="@($"background:{bgGrad}; color:white; border-radius:12px;")">
+        <div class="d-flex align-center" style="gap:18px;">
+            <MudIcon Icon="@icon" Style="font-size:3.2rem; color:white;" />
+            <div>
+                <MudText Typo="Typo.h4" Style="font-weight:700;">@headline</MudText>
+                <MudText Typo="Typo.subtitle1" Style="opacity:0.9; margin-top:4px;">@subline</MudText>
+            </div>
+        </div>
+    </div>
+
+    <MudPaper Elevation="0" Class="pa-6 mt-4" Style="border:1px solid #e2e8f0;">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.overline" Style="color:#64748b;">TRANSACTION ID</MudText>
+                <MudText Style="font-family:'JetBrains Mono', monospace; word-break:break-all;">@_result.TransactionId</MudText>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.overline" Style="color:#64748b;">CALLER TXN ID</MudText>
+                <MudText Style="font-family:'JetBrains Mono', monospace; word-break:break-all;">@_result.CallerTxnId</MudText>
+            </MudItem>
             @if (_result.McgResponse is not null)
             {
-                <MudText>Episode ID: <code>@_result.McgResponse.EpisodeId</code></MudText>
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.overline" Style="color:#64748b;">EPISODE ID</MudText>
+                    <MudText Style="font-family:'JetBrains Mono', monospace;">@_result.McgResponse.EpisodeId</MudText>
+                </MudItem>
             }
-            @if (!string.IsNullOrEmpty(_result.FailureReason))
-            {
-                <MudAlert Severity="Severity.Error" Class="mt-3" Dense="true">@_result.FailureReason</MudAlert>
-            }
-            <MudText Typo="Typo.body2" Class="mt-3">
-                The result has been delivered to the calling application. This window will close automatically.
-            </MudText>
-        </MudCardContent>
-    </MudCard>
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.overline" Style="color:#64748b;">STATUS</MudText>
+                <MudText>
+                    <MudChip T="string" Color="@(ok ? Color.Success : Color.Error)" Size="Size.Small" Variant="Variant.Filled">@_result.Status</MudChip>
+                </MudText>
+            </MudItem>
+        </MudGrid>
 
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.body2" Style="color:#475569;" Align="Align.Center">
+            <MudIcon Icon="@Icons.Material.Filled.Timer" Style="font-size:0.95rem; vertical-align:middle; margin-right:4px;" />
+            This window will close automatically.
+        </MudText>
+    </MudPaper>
+
+    <script id="bridge-payload" type="application/json">@((MarkupString)PayloadJson)</script>
+    <script id="bridge-origins" type="application/json">@((MarkupString)AllowedOriginsJson)</script>
     <script>
       (function () {
+        console.log('[mcg-bridge] complete page script running');
+        var payload, origins;
         try {
-          var payload = @PayloadJson;
-          if (window.opener && !window.opener.closed) {
-            var origins = @AllowedOriginsJson;
-            origins.forEach(function (o) {
-              try { window.opener.postMessage({ source: 'mcg-bridge', payload: payload }, o); }
-              catch (e) { /* ignore */ }
-            });
-          }
-        } catch (e) { console.warn('postMessage failed', e); }
-
+          payload = JSON.parse(document.getElementById('bridge-payload').textContent);
+          origins = JSON.parse(document.getElementById('bridge-origins').textContent);
+        } catch (e) { console.error('[mcg-bridge] parse failed', e); return; }
+        console.log('[mcg-bridge] payload', payload);
+        console.log('[mcg-bridge] opener present?', !!window.opener, 'closed?', window.opener && window.opener.closed);
+        if (window.opener && !window.opener.closed) {
+          origins.forEach(function (o) {
+            try { window.opener.postMessage({ source: 'mcg-bridge', payload: payload }, o);
+                  console.log('[mcg-bridge] postMessage sent to', o); }
+            catch (e) { console.warn('[mcg-bridge] postMessage failed for', o, e); }
+          });
+        } else {
+          console.warn('[mcg-bridge] no window.opener — cannot deliver via postMessage');
+        }
         @if (BridgeOpts.Value.AutoCloseOnComplete)
         {
-            <text>setTimeout(function () { try { window.close(); } catch (e) {} }, 1500);</text>
+            <text>setTimeout(function () {
+              console.log('[mcg-bridge] window.close()');
+              try { window.close(); } catch (e) { console.warn('[mcg-bridge] close failed', e); }
+            }, 1500);</text>
         }
       })();
     </script>
@@ -57,8 +98,7 @@ else
 
     private MCGCareWEBQI.Shared.Models.Result.IntegrationResult? _result;
 
-    private string PayloadJson => _result is null
-        ? "null"
+    private string PayloadJson => _result is null ? "null"
         : System.Text.Json.JsonSerializer.Serialize(_result);
 
     private string AllowedOriginsJson

@@ -42,8 +42,8 @@ public static class InterfaceLoginEndpoint
             log.LogInformation("Mock MCG session {Sid} created for episode {Ep} (requestType={Rt})",
                 session.SessionId, session.EpisodeId, session.RequestType);
 
-            // Redirect the popup window into the clinician UI.
-            return Results.Redirect($"/clinician/{session.SessionId}");
+            // Land on the MCG "Enter Documentation" page (matches real CareWebQI flow).
+            return Results.Redirect($"/cwqi/login/{session.SessionId}");
         });
     }
 }

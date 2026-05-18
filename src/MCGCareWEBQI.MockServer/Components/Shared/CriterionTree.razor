@@ -1,0 +1,163 @@
+@using MCGCareWEBQI.MockServer.Models.Cwqi
+
+@if (Node is null)
+{
+    <span></span>
+}
+else
+{
+    <div class="tree-row">
+        <span class="expander" @onclick="ToggleExpand">
+            @(Node.IsLeaf ? "" : (_expanded ? "−" : "+"))
+        </span>
+
+        @if (Node.IsLeaf)
+        {
+            <input type="checkbox" @bind="Node.Checked" @bind:after="OnChanged" style="margin-top:4px;" />
+        }
+        else
+        {
+            <span class="eval-circle @StatusClass(Node.DerivedStatus)">
+                @(Node.DerivedStatus switch {
+                    NodeStatus.Met    => "✓",
+                    NodeStatus.NotMet => "✕",
+                    _ => "○"
+                })
+            </span>
+        }
+
+        <span class="text-block">
+            <span class="@(Node.IsLeaf ? "" : "label bold")">
+                @if (Node.ClinicalTerms.Length > 0 && Node.ClinicalTerms.Any(t => Node.Text.Contains(t)))
+                {
+                    foreach (var token in TokenizeWithLinks(Node.Text, Node.ClinicalTerms))
+                    {
+                        if (token.IsLink)
+                        {
+                            <span class="clinical-term" title="Definition: @token.Text">@token.Text</span>
+                        }
+                        else
+                        {
+                            @token.Text
+                        }
+                    }
+                }
+                else
+                {
+                    @Node.Text
+                }
+            </span>
+
+            @if (Node.References.Length > 0)
+            {
+                @(" ")
+                @foreach (var r in Node.References)
+                {
+                    <span class="ref-letter" title="See reference @r">@r</span>
+                }
+            }
+
+            @if (!Node.IsLeaf && Node.Gate != CriterionGate.None)
+            {
+                <span style="font-weight:400; color:#212121;">
+                    @(", as indicated by ")
+                    <strong>@(Node.Gate == CriterionGate.AllOf ? "ALL" : "1 or more")</strong>
+                    of the following
+                </span>
+            }
+
+            @if (Node.Counts.Length > 0)
+            {
+                @foreach (var c in Node.Counts)
+                {
+                    @(" (")<span class="count-badge" title="See count @c">@c</span>@(")")
+                }
+            }
+
+            @if (!Node.IsLeaf) { @(" :") }
+
+            @foreach (var calc in Node.Calculators)
+            {
+                <span class="calc-widget" title="@calc.Tooltip">
+                    <span class="material-symbols-rounded" style="font-size:0.9rem;">calculate</span>
+                    @calc.Label
+                </span>
+            }
+
+            <span class="note-icon @(string.IsNullOrEmpty(Node.Note) ? "" : "has-note")"
+                  title="@(string.IsNullOrEmpty(Node.Note) ? "Add note" : Node.Note)"
+                  @onclick="ToggleNote"></span>
+
+            @if (_showNote)
+            {
+                <div style="margin-top:4px; max-width:520px;">
+                    <textarea rows="2" style="width:100%; font-size:0.85rem;"
+                              @bind="Node.Note" @bind:after="OnChanged"
+                              placeholder="Note for this criterion..."></textarea>
+                </div>
+            }
+
+            @if (Node.IsLeaf && Node.RequiresJustification && Node.Checked)
+            {
+                <div style="margin-top:6px;">
+                    <div style="color:#c62828; font-weight:700;">*</div>
+                    <textarea rows="3" style="width:100%; max-width:680px; font-size:0.9rem;"
+                              maxlength="@Node.JustificationMaxChars"
+                              @bind="Node.Justification" @bind:after="OnChanged"></textarea>
+                    <div style="font-size:0.78rem; color:#616161;">
+                        @(Node.JustificationMaxChars - (Node.Justification?.Length ?? 0)) Character(s) Remaining
+                    </div>
+                </div>
+            }
+        </span>
+    </div>
+
+    @if (_expanded && !Node.IsLeaf)
+    {
+        <div class="tree-children">
+            @foreach (var child in Node.Children)
+            {
+                <CriterionTree Node="child" OnChange="OnChanged" />
+            }
+        </div>
+    }
+}
+
+@code {
+    [Parameter] public CriterionNode? Node { get; set; }
+    [Parameter] public EventCallback OnChange { get; set; }
+
+    private bool _expanded = true;
+    private bool _showNote = false;
+
+    private void ToggleExpand() => _expanded = !_expanded;
+    private void ToggleNote()   => _showNote = !_showNote;
+    private Task OnChanged()    => OnChange.InvokeAsync();
+
+    private static string StatusClass(NodeStatus s) => s switch
+    {
+        NodeStatus.Met    => "met",
+        NodeStatus.NotMet => "notmet",
+        _                 => "unset",
+    };
+
+    private record Token(string Text, bool IsLink);
+    private static IEnumerable<Token> TokenizeWithLinks(string text, string[] terms)
+    {
+        var remaining = text;
+        while (remaining.Length > 0)
+        {
+            var idx  = -1;
+            var hit  = "";
+            foreach (var t in terms)
+            {
+                var i = remaining.IndexOf(t, StringComparison.OrdinalIgnoreCase);
+                if (i >= 0 && (idx < 0 || i < idx)) { idx = i; hit = t; }
+            }
+            if (idx < 0) { yield return new(remaining, false); yield break; }
+            if (idx > 0) yield return new(remaining[..idx], false);
+            yield return new(remaining.Substring(idx, hit.Length), true);
+            remaining = remaining[(idx + hit.Length)..];
+        }
+    }
+}

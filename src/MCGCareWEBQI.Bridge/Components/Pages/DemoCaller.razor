@@ -1,103 +1,247 @@
 @page "/demo"
+@layout GuidingCareLayout
 @rendermode InteractiveServer
 
-<PageTitle>MCG Bridge demo caller</PageTitle>
+<PageTitle>GuidingCare &mdash; Decisions</PageTitle>
 
-<MudGrid Spacing="3" Class="mt-2">
-    <MudItem xs="12" md="6">
-        <MudCard Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Simulate a calling application</MudText>
-                    <MudText Typo="Typo.caption">Stands in for EvokeConnect (or any caller) so you can click through end-to-end.</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudTextField @bind-Value="_callerId" Label="callerId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_callerTxnId" Label="callerTxnId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_patientId" Label="patientId" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_patientFirstName" Label="patientFirstName" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_patientLastName"  Label="patientLastName"  Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_patientDob"       Label="patientDateOfBirth (mm/dd/yyyy)" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudRadioGroup T="string" @bind-Value="_patientGender" Class="mb-2">
-                    <MudText Typo="Typo.caption" Class="d-block mb-1">patientGender</MudText>
-                    <MudRadio Value="@("Female")" Color="Color.Primary">Female</MudRadio>
-                    <MudRadio Value="@("Male")"   Color="Color.Primary">Male</MudRadio>
-                </MudRadioGroup>
-                <MudTextField @bind-Value="_episodeType"    Label="episodeType"      Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_episodeAdmit"   Label="episodeAdmitDate" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-                <MudTextField @bind-Value="_episodeCodes"   Label="episodeCodes"     Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-2" />
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.OpenInNew"
-                           OnClick="OpenPopup" FullWidth="true">
-                    Launch MCG popup
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    </MudItem>
+<!-- Decision Review header card -->
+<div class="gc-card">
+    <div class="gc-card-header">
+        <span class="material-symbols-rounded" style="color:#1565c0;">fact_check</span>
+        Decision Review and Approval for Authorization ID: 1109SYY0F
+        <span style="flex:1;"></span>
+        <span style="font-weight:400; font-size:0.82rem;">
+            Decision Count <strong style="color:#0b2545;">1</strong> &nbsp;
+            Pending Decision <strong style="color:#0b2545;">1</strong> &nbsp;
+            Auth owner <strong style="color:#0b2545;">Arun Katpally</strong> &nbsp;
+            Auth Priority <strong style="color:#0b2545;">N/A</strong>
+        </span>
+    </div>
+    <div class="gc-card-body" style="padding:0;">
+        <div style="overflow-x:auto;">
+            <table class="gc-table" style="min-width:1200px;">
+                <thead>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th>Decision Group</th><th>Review</th><th>SCA</th>
+                        <th>Decision Status</th><th>Status Code</th>
+                        <th>Is Primary</th><th>Service Description</th>
+                        <th>Service Code</th><th>Modifier Code</th>
+                        <th>Unit Type</th><th>From Date</th><th>To Date</th>
+                        <th>Req.</th><th>Appr.</th><th>Used</th><th>Dnd.</th>
+                        <th>Freq.</th><th>Guidelines</th><th>Decision Date Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="decision-row">
+                        <td class="icon-cell">▸</td>
+                        <td>Decision 1</td>
+                        <td><select><option>Initial</option><option>Concurrent</option></select></td>
+                        <td>&nbsp;</td>
+                        <td><select><option>Pending</option><option>Approved</option><option>Denied</option></select></td>
+                        <td><select><option>Select</option><option>Medical Necessity</option></select></td>
+                        <td>☐ Primary</td>
+                        <td>Diabetes 🔍</td>
+                        <td>G8777</td>
+                        <td><input type="text" value="XX" style="max-width:50px;" /> ⓘ</td>
+                        <td><select><option>Days</option><option>Visits</option></select></td>
+                        <td><input type="text" value="05/18/2026" /></td>
+                        <td><input type="text" value="05/19/2026" /></td>
+                        <td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>@(_mcgRow is null ? "N/A" : "1")</td>
+                        <td>N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <MudItem xs="12" md="6">
-        <MudCard Elevation="2" Class="mb-3">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Launch URL</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudTextField T="string" Value="@LaunchUrl" Lines="3" ReadOnly="true" Variant="Variant.Outlined" />
-            </MudCardContent>
-        </MudCard>
+        <!-- Authorization Totals -->
+        <div style="padding:10px 14px; background:#f1f5f9; border-top:1px solid #e2e8f0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <strong style="color:#0b2545;">Authorization Totals For Decision Service Lines</strong>
+                <span style="font-size:0.78rem; color:#475569;">Bulk Procedure Update
+                    <select style="margin-left:6px; padding:2px 4px;"><option>Select review type</option></select>
+                </span>
+            </div>
+            <div class="gc-totals">
+                <span class="chip">Recommended Units <strong>&nbsp;</strong></span>
+                <span class="chip">Current Hours from OPS <strong>&nbsp;</strong></span>
+                <span class="chip">Previously Approved Units <strong>&nbsp;</strong></span>
+                <span class="chip">Total Requested Days <strong>1</strong></span>
+                <span class="chip">Total Approved Days <strong>&nbsp;</strong></span>
+                <span class="chip">Total Used Days <strong>&nbsp;</strong></span>
+                <span class="chip">Other Requested Units <strong>&nbsp;</strong></span>
+                <span class="chip">Other Approved Units <strong>&nbsp;</strong></span>
+                <span class="chip">Other Used Units <strong>&nbsp;</strong></span>
+            </div>
+            <div style="text-align:right; margin-top:10px;">
+                <label style="margin-right:8px;"><input type="checkbox" /> </label>
+                <button class="mcg-btn" style="background:#f5f5f5; border:1px solid #9e9e9e; padding:5px 18px;">💾 Save</button>
+                <button class="mcg-btn" style="background:#f5f5f5; border:1px solid #9e9e9e; padding:5px 18px; margin-left:6px;">⊘ Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        <MudCard Elevation="2">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">Result returned by bridge</MudText>
-                    <MudText Typo="Typo.caption">Captured via <code>window.postMessage</code> from the popup.</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
-            <MudCardContent>
-                <pre id="demo-result" style="background:#f8f9fa; padding:1rem; min-height:8rem; max-height:24rem; overflow:auto; font-size:0.85rem; border-radius:4px;">(waiting for popup result&hellip;)</pre>
-            </MudCardContent>
-        </MudCard>
-    </MudItem>
-</MudGrid>
+<!-- Decision Support panel -->
+<div class="gc-card">
+    <div class="gc-card-header">
+        <span class="material-symbols-rounded" style="color:#1565c0;">support</span>
+        Decision Support
+    </div>
+    <div class="gc-card-body" style="padding:0;">
+        <div class="gc-tabs" style="padding:0 14px;">
+            <span class="t">Decision Support</span>
+            <span class="t">Notes</span>
+            <span class="t active">Run Guidelines</span>
+            <span class="t">Service Plan Summary</span>
+            <span class="t">Additional Information</span>
+        </div>
+
+        <div style="padding:14px;">
+            <!-- Internal Guideline Summary -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#0b2545; font-size:0.92rem;">Internal Guideline Summary</strong>
+                <button class="gc-add-btn"><span class="material-symbols-rounded">play_circle</span> Run Script</button>
+            </div>
+            <table class="gc-table">
+                <thead>
+                    <tr><th>Script Name</th><th>Staff Name</th><th>Initiated On</th><th>Total Score Received</th><th>Completed On</th><th>Status</th><th>View Response</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:14px;">No Records Found</td></tr>
+                </tbody>
+            </table>
+
+            <!-- External Guidelines -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:18px 0 8px 0;">
+                <strong style="color:#0b2545; font-size:0.92rem;">External Guidelines</strong>
+                <div>
+                    <button class="gc-add-btn"><span class="material-symbols-rounded">add_circle</span> Add InterQual</button>
+                    <button class="gc-add-btn" @onclick="OpenMcgPopup">
+                        <span class="material-symbols-rounded" style="color:#5fb15c;">add_circle</span>
+                        Add MCG
+                    </button>
+                </div>
+            </div>
+            <table class="gc-table">
+                <thead>
+                    <tr><th>Guideline Name</th><th>Episode ID</th><th>Requested/Recommended Service Codes</th><th>Criteria Result</th><th>Criteria Result Description</th><th>Criteria Status</th><th>View Documentation</th><th>View Episode Summary</th></tr>
+                </thead>
+                <tbody>
+                    @if (_mcgRow is null)
+                    {
+                        <tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:14px;">No items to display</td></tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td><strong>@_mcgRow.GuidelineName</strong></td>
+                            <td><code>@_mcgRow.EpisodeId</code></td>
+                            <td>@_mcgRow.ServiceCodes</td>
+                            <td>
+                                <span class="gc-status-pill @(_mcgRow.Status == "Met" ? "met" : (_mcgRow.Status == "NotMet" ? "notmet" : "pending"))">
+                                    @_mcgRow.Status
+                                </span>
+                            </td>
+                            <td>@_mcgRow.ResultDescription</td>
+                            <td>@_mcgRow.Status</td>
+                            <td><a href="#" @onclick="ToggleRaw" @onclick:preventDefault>View</a></td>
+                            <td><a href="#" @onclick="ToggleRaw" @onclick:preventDefault>View</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (_showRaw && _mcgRow is not null)
+            {
+                <div style="margin-top:14px; padding:12px; background:#0f172a; color:#5eead4; border-radius:4px; font-size:0.78rem; max-height:24rem; overflow:auto; font-family:'JetBrains Mono', monospace; white-space:pre-wrap; word-break:break-all;">@_resultJson</div>
+            }
+
+            <div style="margin-top:14px; padding:14px; background:#fafafa; border:1px dashed #cbd5e1; border-radius:4px; color:#64748b; font-size:0.85rem;">
+                <strong style="color:#0f172a;">How it works:</strong>
+                Clicking <strong style="color:#1565c0;">+ Add MCG</strong> opens the MCG CareWebQI popup. The clinician documents indications and clicks <em>Exit Episode</em>.
+                MCG posts a <code>CwqiMessage</code> back to the bridge's <code>/receive</code> endpoint, which parses, persists, calls <code>Reconcile.asmx</code> to ACK,
+                then sends the structured result back to this page via <code>window.postMessage</code>.
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
   (function () {
     window.addEventListener('message', function (event) {
       if (event.data && event.data.source === 'mcg-bridge') {
-        document.getElementById('demo-result').textContent =
-            JSON.stringify(event.data.payload, null, 2);
+        var p = event.data.payload || {};
+        var g = (p.mcgResponse && p.mcgResponse.guidelines && p.mcgResponse.guidelines[0]) || null;
+        var first = g && g.outlines ? g.outlines.find(function(o){ return o.status === 'Met'; }) : null;
+        DotNet.invokeMethodAsync('MCGCareWEBQI.Bridge', 'McgPopupCompleted', JSON.stringify({
+            GuidelineName:    g ? g.title : 'Diabetes',
+            EpisodeId:        (p.mcgResponse && p.mcgResponse.episodeId) || 'unknown',
+            ServiceCodes:     'G8777',
+            Status:           g && g.outlines && g.outlines.some(function(o){ return o.status === 'Met'; }) ? 'Met' : (p.status === 'Failed' ? 'Failed' : 'Unset'),
+            ResultDescription: first ? first.name : (p.status || ''),
+            Raw:              JSON.stringify(p, null, 2)
+        }));
       }
     });
     window.__mcgBridgeDemoOpen = function (url) {
-      window.open(url, 'mcg-popup', 'width=1200,height=820,menubar=no,toolbar=no');
+      window.open(url, 'mcg-popup', 'width=1280,height=860,menubar=no,toolbar=no');
     };
   })();
 </script>
 
 @code {
-    private string _callerId         = "demo-caller";
-    private string _callerTxnId      = Guid.NewGuid().ToString();
-    private string _patientId        = "P-10042";
-    private string _patientFirstName = "Jane";
-    private string _patientLastName  = "Doe";
-    private string _patientDob       = "01/15/1980";
-    private string _patientGender    = "Female";
-    private string _episodeType      = "Inpatient";
-    private string _episodeAdmit     = DateTime.Today.ToString("MM/dd/yyyy");
-    private string _episodeCodes     = "I10|icd10cm";
+    private static System.Collections.Concurrent.ConcurrentDictionary<string, McgRow> _rows = new();
+    private static event Action? _onUpdate;
+    private McgRow? _mcgRow;
+    private bool _showRaw;
+    private string _resultJson = "";
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
-    private string LaunchUrl => $"/launch?{System.Net.WebUtility.UrlEncode(string.Empty)}callerId={U(_callerId)}&callerTxnId={U(_callerTxnId)}&patientId={U(_patientId)}&patientFirstName={U(_patientFirstName)}&patientLastName={U(_patientLastName)}&patientDateOfBirth={U(_patientDob)}&patientGender={U(_patientGender)}&episodeType={U(_episodeType)}&episodeAdmitDate={U(_episodeAdmit)}&episodeCodes={U(_episodeCodes)}";
-
-    private static string U(string s) => System.Net.WebUtility.UrlEncode(s ?? "");
-
-    private async Task OpenPopup()
+    protected override void OnInitialized()
     {
-        if (string.IsNullOrEmpty(_callerTxnId)) _callerTxnId = Guid.NewGuid().ToString();
-        await JS.InvokeVoidAsync("__mcgBridgeDemoOpen", LaunchUrl);
+        _onUpdate += Refresh;
+        if (_rows.TryGetValue("latest", out var r)) { _mcgRow = r; _resultJson = r.Raw; }
+    }
+
+    public void Dispose() => _onUpdate -= Refresh;
+
+    private void Refresh() => InvokeAsync(StateHasChanged);
+
+    private async Task OpenMcgPopup()
+    {
+        var txnId = Guid.NewGuid().ToString();
+        var url   = $"/launch?callerId=guidingcare&callerTxnId={txnId}"
+                  + "&patientId=AH00000253&patientFirstName=Donald&patientMI=W&patientLastName=Charleston"
+                  + "&patientDateOfBirth=01/15/1980&patientGender=Male"
+                  + "&episodeType=Inpatient"
+                  + $"&episodeAdmitDate={DateTime.Today:MM/dd/yyyy}"
+                  + "&episodeCodes=E08.44|icd10cm";
+        await JS.InvokeVoidAsync("__mcgBridgeDemoOpen", url);
+    }
+
+    private void ToggleRaw() => _showRaw = !_showRaw;
+
+    [JSInvokable]
+    public static Task McgPopupCompleted(string json)
+    {
+        var row = System.Text.Json.JsonSerializer.Deserialize<McgRow>(json,
+            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        if (row is not null) _rows["latest"] = row;
+        _onUpdate?.Invoke();
+        return Task.CompletedTask;
+    }
+
+    public sealed class McgRow
+    {
+        public string GuidelineName     { get; set; } = "";
+        public string EpisodeId         { get; set; } = "";
+        public string ServiceCodes      { get; set; } = "";
+        public string Status            { get; set; } = "";
+        public string ResultDescription { get; set; } = "";
+        public string Raw               { get; set; } = "";
     }
 }

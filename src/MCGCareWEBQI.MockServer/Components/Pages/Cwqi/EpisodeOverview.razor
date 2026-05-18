@@ -1,0 +1,138 @@
+@page "/cwqi/episode/{SessionId:guid}"
+@rendermode InteractiveServer
+@inject McgSessionStore Store
+@inject NavigationManager Nav
+
+<PageTitle>CareWebQI &mdash; Episode Overview</PageTitle>
+
+@if (_session is null)
+{
+    <div class="cwqi-card" style="max-width:560px; margin:24px auto;">
+        <div class="cwqi-card-body"><strong>Session not found.</strong></div>
+    </div>
+}
+else
+{
+    <div class="breadcrumb" style="position:relative;">
+        Episode Overview
+        <span style="position:absolute; right:0; top:8px; color:#5fb15c; font-style:italic; font-weight:700;">mcg</span>
+    </div>
+
+    <!-- Patient card -->
+    <div class="cwqi-card">
+        <div class="cwqi-card-header">
+            <span style="font-family:monospace; font-size:0.9rem;">⊞</span>
+            <strong>@PatientFullName</strong>
+            <span style="font-weight:400;">(@(_session.PatientId ?? "AH00000253"))</span>
+        </div>
+    </div>
+
+    <!-- Episode card -->
+    <div class="cwqi-card">
+        <div class="cwqi-card-header" style="display:grid; grid-template-columns: 1fr 1fr 1.6fr auto; gap:16px;">
+            <div>
+                <span style="font-family:monospace;">⊞</span>
+                <strong>Episode</strong> @_session.EpisodeId
+            </div>
+            <div style="font-weight:400;">
+                <strong>Actual Admit Date:</strong> @(_session.EpisodeAdmitDate ?? "5/18/2026")<br/>
+                <strong>Next Review Date:</strong>&nbsp;
+            </div>
+            <div style="font-weight:400;">
+                <strong>Primary Diagnosis Code:</strong> @_session.PrimaryDiagnosis
+            </div>
+            <a href="#">Episode Summary</a>
+        </div>
+        <div style="background:#e3f0fa; padding:14px 16px;">
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <button class="mcg-btn" disabled style="opacity:0.6;">Discharge Episode</button>
+                <button class="mcg-btn" @onclick="ExitEpisode">Exit Episode</button>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+                <button class="mcg-btn" @onclick="AddGuidelines">Add Guidelines</button>
+                <span style="font-weight:600;">Careflow:</span>
+                <select style="padding:3px 6px;">
+                    <option>Complete Documentation Careflow</option>
+                </select>
+            </div>
+            <table class="cwqi-table" style="margin-top:6px;">
+                <thead>
+                    <tr>
+                        <th>Guideline Name</th><th style="width:80px;">GLOS</th><th>Document</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (_session.SelectedGuideline is { } g)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@g.Title</strong><br/>
+                                <a href="#" @onclick="OpenDocument" @onclick:preventDefault>@g.Code</a>
+                                <span style="color:#616161;">(@g.Product)</span>
+                                &nbsp;<a href="#" @onclick="RemoveGuideline" @onclick:preventDefault>Remove Guideline</a>
+                            </td>
+                            <td>@g.Glos</td>
+                            <td>
+                                <div>▸ <input type="checkbox" /> <a href="#" @onclick="OpenDocument" @onclick:preventDefault>Care Planning - Inpatient Admission and Alternatives</a></div>
+                                <div>▸ <input type="checkbox" /> <a href="#" @onclick:preventDefault>Hospitalization</a></div>
+                                <div>▸ <input type="checkbox" /> <a href="#" @onclick:preventDefault>Discharge</a></div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr><td colspan="3" style="color:#757575;">(No guidelines attached. Click <em>Add Guidelines</em>.)</td></tr>
+                    }
+                </tbody>
+            </table>
+            <div style="margin-top:10px;">
+                <button class="mcg-btn">Add Episode Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="background:#fde7e7; border:1px solid #e6a7a7; padding:6px 14px; margin-top:10px; text-align:center; font-size:0.85rem; color:#212121;">
+        Warning: Potentially sensitive patient data is contained here. Follow patient privacy policies.
+    </div>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+    private McgMockSession? _session;
+
+    protected override void OnInitialized() => _session = Store.Get(SessionId);
+
+    private string PatientFullName
+    {
+        get
+        {
+            var first = _session?.PatientFirstName ?? "Donald";
+            var mi    = _session?.PatientMI;
+            var last  = _session?.PatientLastName  ?? "Charleston";
+            return string.IsNullOrEmpty(mi) ? $"{first} {last}" : $"{first} {mi[0]} {last}";
+        }
+    }
+
+    private void OpenDocument()
+    {
+        if (_session?.SelectedGuideline is not null)
+            Nav.NavigateTo($"/cwqi/document/{SessionId}/{_session.SelectedGuideline.Code}", forceLoad: false);
+    }
+
+    private void AddGuidelines() => Nav.NavigateTo($"/cwqi/search/{SessionId}", forceLoad: false);
+
+    private void RemoveGuideline()
+    {
+        if (_session is null) return;
+        _session.SelectedGuideline = null;
+        Store.Save(_session);
+    }
+
+    private void ExitEpisode()
+    {
+        if (_session is null) return;
+        _session.Exited = true;
+        Store.Save(_session);
+        Nav.NavigateTo($"/exit/{SessionId}", forceLoad: true);
+    }
+}

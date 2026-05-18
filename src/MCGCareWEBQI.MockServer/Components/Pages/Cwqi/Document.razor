@@ -1,0 +1,179 @@
+@page "/cwqi/document/{SessionId:guid}/{GuidelineCode}"
+@rendermode InteractiveServer
+@using MCGCareWEBQI.MockServer.Models.Cwqi
+@using MCGCareWEBQI.MockServer.Components.Shared
+@inject McgSessionStore Store
+@inject NavigationManager Nav
+
+<PageTitle>CareWebQI &mdash; @(_session?.SelectedGuideline?.Title ?? "Documentation")</PageTitle>
+
+@if (_session is null)
+{
+    <div class="cwqi-card" style="max-width:560px; margin:24px auto;">
+        <div class="cwqi-card-body"><strong>Session not found.</strong></div>
+    </div>
+}
+else if (_session.SelectedGuideline is null)
+{
+    <div class="cwqi-card" style="max-width:560px; margin:24px auto;">
+        <div class="cwqi-card-body"><strong>No guideline selected.</strong> <a href="@($"/cwqi/search/{SessionId}")">Choose a guideline</a></div>
+    </div>
+}
+else
+{
+    var g = _session.SelectedGuideline;
+
+    <div class="breadcrumb" style="position:relative;">
+        <a href="@($"/cwqi/episode/{SessionId}")">Episode Overview</a> &gt; Section
+        <span style="position:absolute; right:0; top:8px; color:#5fb15c; font-style:italic; font-weight:700;">mcg</span>
+    </div>
+
+    <!-- Patient header card -->
+    <div class="cwqi-card">
+        <div class="cwqi-card-header">
+            <span style="font-family:monospace;">⊞</span>
+            <strong>@PatientFullName</strong>
+            <span style="font-weight:400;">(@(_session.PatientId ?? "AH00000253"))</span>
+        </div>
+    </div>
+
+    <!-- Episode summary card -->
+    <div class="cwqi-card">
+        <div class="cwqi-card-header" style="display:grid; grid-template-columns: 1fr 1fr 1.6fr auto; gap:16px;">
+            <div><span style="font-family:monospace;">⊞</span> <strong>Episode</strong> @_session.EpisodeId</div>
+            <div style="font-weight:400;">
+                <strong>Actual Admit Date:</strong> @(_session.EpisodeAdmitDate ?? "5/18/2026")<br/>
+                <strong>Next Review Date:</strong>&nbsp;
+            </div>
+            <div style="font-weight:400;"><strong>Primary Diagnosis Code:</strong> @_session.PrimaryDiagnosis</div>
+            <a href="#">Episode Summary</a>
+        </div>
+    </div>
+
+    <!-- Guideline card -->
+    <div class="cwqi-card">
+        <div class="cwqi-card-header">
+            <strong>Guideline:</strong> @g.Title (&nbsp;<a href="#">@g.Code</a>&nbsp;)
+            <span style="margin-left:auto;"></span>
+            <span><strong>GLOS:</strong> @g.Glos</span>
+            <span style="margin-left:14px;"><strong>Next Review Date:</strong>&nbsp;</span>
+        </div>
+    </div>
+
+    <div style="margin:12px 0; display:flex; align-items:center; gap:14px;">
+        <label style="font-weight:600;">Next Review Date:</label>
+        <input type="text" placeholder="m/d/yyyy" style="padding:3px 6px; width:140px;" />
+        <span style="color:#616161; font-size:0.85rem;">m/d/yyyy</span>
+    </div>
+
+    <div class="mcg-btn-row">
+        <button class="mcg-btn" @onclick="Save">Save</button>
+        &nbsp;
+        <button class="mcg-btn" @onclick="Cancel">Cancel</button>
+    </div>
+
+    @if (_session.AnySelectionsMade)
+    {
+        <div class="selections-banner">Selections Made, Indications Met</div>
+    }
+
+    <div class="cwqi-card">
+        <div class="cwqi-card-body">
+            <h3 style="margin:0 0 4px 0; font-size:1.1rem;">Clinical Indications for Admission to Inpatient Care</h3>
+            <p style="font-style:italic; font-size:0.9rem; color:#212121; margin:0 0 8px 0;">
+                Note: Some patients may be appropriate for <a href="#">Observation care</a> <span style="display:inline-block; width:12px; height:12px; border:1px solid #757575; border-radius:50%;"></span>.
+                For consideration of observation care, see <a href="#">Diabetes: Observation Care</a>.
+            </p>
+            <a href="#" style="font-size:0.9rem;" @onclick="ToggleExpandAll" @onclick:preventDefault>▶ @(_allExpanded ? "Collapse All" : "Expand All")</a>
+
+            <div style="margin-top:8px;">
+                @foreach (var section in g.RootSections)
+                {
+                    <CriterionTree Node="section" OnChange="OnTreeChanged" />
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="mcg-btn-row">
+        <button class="mcg-btn" @onclick="Save">Save</button>
+        &nbsp;
+        <button class="mcg-btn" @onclick="Cancel">Cancel</button>
+    </div>
+
+    <!-- Clinical Notes section -->
+    <div style="margin-top:12px;">
+        <button class="mcg-btn" style="font-size:0.82rem;">View Note History</button>
+    </div>
+    <h3 style="margin:14px 0 4px 0; font-size:1.05rem;">Clinical Notes</h3>
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+        <label style="font-weight:600;">Subject:</label>
+        <select @bind="_session.ClinicalNotesSubject" style="padding:3px 6px;">
+            <option>None Specified</option>
+            <option>Admission Review</option>
+            <option>Concurrent Review</option>
+            <option>Discharge Planning</option>
+        </select>
+    </div>
+    <div style="border:1px solid #b0bec5; padding:6px; background:#fafafa;">
+        <div style="border-bottom:1px solid #cfd8dc; padding-bottom:4px; margin-bottom:4px; display:flex; gap:6px; color:#424242;">
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Paste">content_paste</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Cut">content_cut</span>
+            <span style="border-left:1px solid #cfd8dc; margin:0 4px;"></span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Undo">undo</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Redo">redo</span>
+            <span style="border-left:1px solid #cfd8dc; margin:0 4px;"></span>
+            <span style="font-weight:700; cursor:pointer;" title="Bold">B</span>
+            <span style="font-style:italic; cursor:pointer;" title="Italic">I</span>
+            <span style="text-decoration:underline; cursor:pointer;" title="Underline">U</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Text color">format_color_text</span>
+            <span style="border-left:1px solid #cfd8dc; margin:0 4px;"></span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Align left">format_align_left</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Align center">format_align_center</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Align right">format_align_right</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Justify">format_align_justify</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Bulleted list">format_list_bulleted</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Numbered list">format_list_numbered</span>
+            <span class="material-symbols-rounded" style="font-size:1.1rem; cursor:pointer;" title="Clear formatting">format_clear</span>
+        </div>
+        <textarea rows="6" style="width:100%; border:none; outline:none; resize:vertical; background:transparent; font-family:inherit;"
+                  @bind="_session.ClinicalNotes" @bind:after="OnTreeChanged"></textarea>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+    [Parameter] public string GuidelineCode { get; set; } = "";
+
+    private McgMockSession? _session;
+    private bool _allExpanded = true;
+
+    protected override void OnInitialized() => _session = Store.Get(SessionId);
+
+    private string PatientFullName
+    {
+        get
+        {
+            var first = _session?.PatientFirstName ?? "Donald";
+            var mi    = _session?.PatientMI;
+            var last  = _session?.PatientLastName  ?? "Charleston";
+            return string.IsNullOrEmpty(mi) ? $"{first} {last}" : $"{first} {mi[0]} {last}";
+        }
+    }
+
+    private Task OnTreeChanged()
+    {
+        if (_session is not null) Store.Save(_session);
+        return Task.CompletedTask;
+    }
+
+    private void Save()
+    {
+        if (_session is not null) Store.Save(_session);
+        Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+    }
+
+    private void Cancel() => Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+
+    private void ToggleExpandAll() => _allExpanded = !_allExpanded;
+}
