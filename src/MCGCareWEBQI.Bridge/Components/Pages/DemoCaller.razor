@@ -366,6 +366,21 @@
       try { return f.contentWindow.location.href; }
       catch (e) { console.warn('[ec] cross-origin iframe, cannot read URL', e); return null; }
     };
+    // Scroll the docked MCG panel into view. Called after launch so users on small
+    // monitors notice it opened below the fold. Retries briefly in case the iframe
+    // hasn't rendered yet when this fires.
+    window.__ecScrollToDock = function () {
+      var tries = 0;
+      var tryScroll = function () {
+        var el = document.getElementById('mcg-panel');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+        if (++tries < 10) setTimeout(tryScroll, 80);
+      };
+      tryScroll();
+    };
   })();
 </script>
 
@@ -409,6 +424,7 @@
         // steal the signal from the live page.
         long latestVersion; string? dockUrl;
         lock (_dockSync) { latestVersion = _dockVersion; dockUrl = _latestDockUrl; }
+        var justDocked = false;
         if (latestVersion > _consumedDockVersion)
         {
             _consumedDockVersion = latestVersion;
@@ -421,8 +437,13 @@
             }
             _isDocked  = true;
             _focusMode = false;
+            justDocked = true;
         }
-        InvokeAsync(StateHasChanged);
+        InvokeAsync(async () =>
+        {
+            StateHasChanged();
+            if (justDocked) await JS.InvokeVoidAsync("__ecScrollToDock");
+        });
     }
 
     private async Task LaunchMcg()
@@ -441,6 +462,9 @@
         if (_dockedMode)
         {
             _isDocked = true;
+            // Scroll the docked panel into view — helps on small monitors so users
+            // immediately see MCG opened in the lower section, not above the fold.
+            await JS.InvokeVoidAsync("__ecScrollToDock");
         }
         else
         {
