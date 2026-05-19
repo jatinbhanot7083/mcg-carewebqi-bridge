@@ -72,20 +72,24 @@ else
           origins = JSON.parse(document.getElementById('bridge-origins').textContent);
         } catch (e) { console.error('[mcg-bridge] parse failed', e); return; }
         console.log('[mcg-bridge] payload', payload);
-        console.log('[mcg-bridge] opener present?', !!window.opener, 'closed?', window.opener && window.opener.closed);
-        if (window.opener && !window.opener.closed) {
+
+        // Deliver to BOTH window.opener (popup mode) and window.parent (docked iframe mode).
+        var sendTo = function (target, label) {
+          if (!target) return;
           origins.forEach(function (o) {
-            try { window.opener.postMessage({ source: 'mcg-bridge', payload: payload }, o);
-                  console.log('[mcg-bridge] postMessage sent to', o); }
-            catch (e) { console.warn('[mcg-bridge] postMessage failed for', o, e); }
+            try { target.postMessage({ source: 'mcg-bridge', payload: payload }, o);
+                  console.log('[mcg-bridge] postMessage sent to', label, o); }
+            catch (e) { console.warn('[mcg-bridge] postMessage failed for', label, o, e); }
           });
-        } else {
-          console.warn('[mcg-bridge] no window.opener — cannot deliver via postMessage');
-        }
+        };
+        if (window.opener && !window.opener.closed) sendTo(window.opener, 'opener');
+        if (window.parent && window.parent !== window) sendTo(window.parent, 'parent');
+
+        var isDocked = !!(window.parent && window.parent !== window);
         @if (BridgeOpts.Value.AutoCloseOnComplete)
         {
             <text>setTimeout(function () {
-              console.log('[mcg-bridge] window.close()');
+              if (isDocked) { /* parent will swap the iframe out */ return; }
               try { window.close(); } catch (e) { console.warn('[mcg-bridge] close failed', e); }
             }, 1500);</text>
         }
@@ -98,8 +102,13 @@ else
 
     private MCGCareWEBQI.Shared.Models.Result.IntegrationResult? _result;
 
+    private static readonly System.Text.Json.JsonSerializerOptions _jsonOpts = new()
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+    };
+
     private string PayloadJson => _result is null ? "null"
-        : System.Text.Json.JsonSerializer.Serialize(_result);
+        : System.Text.Json.JsonSerializer.Serialize(_result, _jsonOpts);
 
     private string AllowedOriginsJson
     {

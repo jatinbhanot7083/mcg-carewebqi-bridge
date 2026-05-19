@@ -28,6 +28,7 @@ public static class McgRequestBuilder
         Add(fields, "requestVersion",           mcg.RequestVersion);
         Add(fields, "returnUrl",                bridgeReturnUrl);
         Add(fields, "isInteractive",            mcg.IsInteractive ? "True" : "False");
+        Add(fields, "allowPatientMerge",        mcg.AllowPatientMerge ? "True" : "False");
         Add(fields, "resultTransform",          mcg.ResultTransform);
         Add(fields, "guidelinePublicationCodes", mcg.GuidelinePublicationCodes);
 

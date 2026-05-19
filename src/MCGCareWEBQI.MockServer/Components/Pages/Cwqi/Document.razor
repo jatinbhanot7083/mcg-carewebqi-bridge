@@ -24,7 +24,7 @@ else
     var g = _session.SelectedGuideline;
 
     <div class="breadcrumb" style="position:relative;">
-        <a href="@($"/cwqi/episode/{SessionId}")">Episode Overview</a> &gt; Section
+        <a href="@($"cwqi/episode/{SessionId}")">Episode Overview</a> &gt; Section
         <span style="position:absolute; right:0; top:8px; color:#5fb15c; font-style:italic; font-weight:700;">mcg</span>
     </div>
 
@@ -170,10 +170,10 @@ else
     private void Save()
     {
         if (_session is not null) Store.Save(_session);
-        Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+        Nav.NavigateTo($"cwqi/episode/{SessionId}", forceLoad: false);
     }
 
-    private void Cancel() => Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+    private void Cancel() => Nav.NavigateTo($"cwqi/episode/{SessionId}", forceLoad: false);
 
     private void ToggleExpandAll() => _allExpanded = !_allExpanded;
 }

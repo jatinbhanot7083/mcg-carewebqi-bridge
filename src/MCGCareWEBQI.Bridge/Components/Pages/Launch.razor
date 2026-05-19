@@ -59,6 +59,11 @@ else
 
     [SupplyParameterFromQuery] public string? DocumentingUser { get; set; }
 
+    /// When the caller passes ?dock=true, post via the bridge's same-origin reverse-proxy
+    /// (/__mcg/interface/interfacelogin.aspx) instead of the absolute MCG URL.
+    /// Avoids the third-party iframe cookie problem.
+    [SupplyParameterFromQuery] public bool Dock { get; set; }
+
     private IReadOnlyList<KeyValuePair<string, string>>? _fields;
     private string _interfaceLoginUrl = "";
     private string? _error;
@@ -96,7 +101,8 @@ else
         {
             var (_, fields, url) = await Integration.InitiateAsync(launch);
             _fields = fields;
-            _interfaceLoginUrl = url;
+            // In dock mode, post through the bridge's same-origin reverse proxy.
+            _interfaceLoginUrl = Dock ? "/__mcg/interface/interfacelogin.aspx" : url;
         }
         catch (Exception ex)
         {

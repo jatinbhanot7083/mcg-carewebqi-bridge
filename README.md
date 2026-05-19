@@ -94,17 +94,31 @@ the CareWebQI 12.0 Developer's Guide.
 
 ## Documentation
 
+### For the engineering team taking over
+
 | File | What it covers |
 |---|---|
-| [docs/INTEGRATION.md](docs/INTEGRATION.md) | How a calling application integrates with the bridge (launch URL, result shapes). |
+| [docs/HANDOVER-RUN-SAMPLE.md](docs/HANDOVER-RUN-SAMPLE.md) | **Start here.** 10-minute setup to get the sample running locally end-to-end. |
+| [docs/HANDOVER-ANGULAR-INTEGRATION.md](docs/HANDOVER-ANGULAR-INTEGRATION.md) | **Read second.** Full integration guide with TypeScript / Angular code for EvokeConnect. |
+| [docs/INTEGRATION.md](docs/INTEGRATION.md) | Caller-agnostic HTTP contract (launch URL, result JSON, delivery modes). |
 | [docs/CONFIG.md](docs/CONFIG.md) | Every `appsettings.json` key, mapped to its Dev Guide section. |
-| [docs/CERTIFICATION-CHECKLIST.md](docs/CERTIFICATION-CHECKLIST.md) | Self-check against Dev Guide Appendix A. |
+| [docs/PRODUCTION-DEPLOYMENT.md](docs/PRODUCTION-DEPLOYMENT.md) | Swap procedure when real MCG keys + tenant URL arrive. |
+
+### For MCG certification
+
+| File | What it covers |
+|---|---|
+| [docs/CERT-PREREQ.md](docs/CERT-PREREQ.md) | MCG-tenant Application Settings + bridge config cross-reference. |
+| [docs/CERT-CHECKLIST.md](docs/CERT-CHECKLIST.md) | Every Appendix A cert step mapped to our solution. |
+| [docs/CERT-DRY-RUN-SCRIPT.md](docs/CERT-DRY-RUN-SCRIPT.md) | Step-by-step internal walkthrough using the mock. |
+| [docs/CERT-FORMAL-SIGN-OFF.md](docs/CERT-FORMAL-SIGN-OFF.md) | Printable Pass/Fail form for the MCG cert reviewer. |
+| [docs/CERTIFICATION-CHECKLIST.md](docs/CERTIFICATION-CHECKLIST.md) | Legacy Dev Guide Appendix A self-check (kept for completeness). |
 
 ## What's intentionally NOT here
 
-- **GuidingCare BusinessObjects DLLs.** Original code linked to compiled
-  EntitySpaces-based DLLs. The new design doesn't write into any caller's tables;
-  it owns its own `IntegrationTransaction` table only.
+- **Caller-specific business-object DLLs.** Original code linked to compiled
+  EntitySpaces-based DLLs from the prior host application. The new design doesn't
+  write into any caller's tables — it owns its own `IntegrationTransaction` table only.
 - **EntitySpaces.** Replaced with EF Core 10 / LINQ.
 - **ASP.NET Web Forms.** Replaced with Blazor Server + minimal API.
 - **Pixel-perfect MCG UI.** Mock UI is functional and labeled correctly. When you

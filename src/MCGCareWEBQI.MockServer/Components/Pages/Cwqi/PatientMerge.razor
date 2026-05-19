@@ -1,0 +1,111 @@
+@page "/cwqi/merge/{SessionId:guid}"
+@rendermode InteractiveServer
+@inject McgSessionStore Store
+@inject NavigationManager Nav
+
+<PageTitle>CareWebQI &mdash; patient merge</PageTitle>
+
+@if (_session is null)
+{
+    <div class="cwqi-card" style="max-width:640px; margin:48px auto;">
+        <div class="cwqi-card-body">
+            <strong>Session not found.</strong>
+            <p>The merge prompt session has expired. Re-launch from the calling application.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="breadcrumb">Episode Overview &gt; Patient merge</div>
+
+    <div class="cwqi-card" style="max-width:780px; margin:24px auto;">
+        <div class="cwqi-card-header" style="background:#fff8e1;">
+            <span style="font-family:monospace; color:#f57c00;">⚠</span>
+            <strong>Patient merge notification</strong>
+        </div>
+        <div class="cwqi-card-body" style="padding:18px 22px;">
+            <p>
+                Episode <strong>@_session.EpisodeId</strong> is currently associated with a different patient
+                in CareWebQI than the patient sent by the calling application on this re-launch.
+            </p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0; background:#f5f9fc; padding:14px; border:1px solid #cfe2f3;">
+                <div>
+                    <div style="color:#5b9bd5; font-size:0.75rem; font-weight:700; letter-spacing:1px;">CURRENTLY IN CAREWEBQI</div>
+                    <div style="margin-top:4px;"><strong>@(_session.PatientLastName ?? "(no name)")</strong>, @(_session.PatientFirstName ?? "")</div>
+                    <div style="color:#616161; font-size:0.85rem;">ID @(_session.PatientId ?? "—")</div>
+                    <div style="color:#616161; font-size:0.85rem;">DOB @(_session.PatientDob ?? "—")</div>
+                </div>
+                <div>
+                    <div style="color:#5b9bd5; font-size:0.75rem; font-weight:700; letter-spacing:1px;">SENT BY CALLER (NEW)</div>
+                    <div style="margin-top:4px;"><strong>@(_session.PendingMergePatientLastName ?? "(no name)")</strong>, @(_session.PendingMergePatientFirstName ?? "")</div>
+                    <div style="color:#616161; font-size:0.85rem;">ID @(_session.PendingMergePatientId ?? "—")</div>
+                    <div style="color:#616161; font-size:0.85rem;">DOB @(_session.PendingMergePatientDob ?? "—")</div>
+                </div>
+            </div>
+
+            <p>
+                Do you want to merge the calling application&rsquo;s patient information into this episode?
+            </p>
+
+            @if (_lastDecisionNo)
+            {
+                <div style="background:#ffebee; border:1px solid #ef9a9a; padding:10px 14px; margin:12px 0; color:#b71c1c;">
+                    <strong>Episode can&rsquo;t be reassigned to another patient.</strong>
+                </div>
+            }
+
+            <div class="mcg-btn-row" style="padding-top:6px;">
+                <button class="mcg-btn" @onclick="OnYes">Yes &mdash; merge</button>
+                &nbsp;
+                <button class="mcg-btn" @onclick="OnNo">No</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid SessionId { get; set; }
+    private McgMockSession? _session;
+    private bool _lastDecisionNo;
+
+    protected override void OnInitialized()
+    {
+        _session = Store.Get(SessionId);
+        _lastDecisionNo = _session?.LastMergeDecision == "no";
+    }
+
+    private void OnYes()
+    {
+        if (_session is null) return;
+        if (!_session.MergeAllowed)
+        {
+            // Mirrors MCG behavior when the Allow Patient Merge setting is False.
+            _lastDecisionNo = true;
+            _session.LastMergeDecision = "no";
+            Store.Save(_session);
+            return;
+        }
+        // Merge: overwrite patient identity with the new one; clear pending fields.
+        _session.InboundFields["patientID"]          = _session.PendingMergePatientId        ?? "";
+        _session.InboundFields["patientFirstName"]   = _session.PendingMergePatientFirstName ?? "";
+        _session.InboundFields["patientLastName"]    = _session.PendingMergePatientLastName  ?? "";
+        _session.InboundFields["patientDateOfBirth"] = _session.PendingMergePatientDob       ?? "";
+        _session.PendingMergePatientId        = null;
+        _session.PendingMergePatientFirstName = null;
+        _session.PendingMergePatientLastName  = null;
+        _session.PendingMergePatientDob       = null;
+        _session.LastMergeDecision = "yes";
+        Store.Save(_session);
+        Nav.NavigateTo($"cwqi/episode/{SessionId}", forceLoad: false);
+    }
+
+    private void OnNo()
+    {
+        if (_session is null) return;
+        _lastDecisionNo = true;
+        _session.LastMergeDecision = "no";
+        Store.Save(_session);
+        // Per cert: the message is shown in place. User can re-attempt by clicking Yes.
+    }
+}

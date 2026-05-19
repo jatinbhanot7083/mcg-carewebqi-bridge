@@ -24,4 +24,16 @@ public sealed class IntegrationResult
     /// Populated only on Failed status.
     public CwqiError? McgError { get; set; }
     public string? FailureReason { get; set; }
+
+    // ---- Integration trace (developer visibility / demo USP) ----
+
+    /// The full URL that opened the popup / iframe (with all query params except hash).
+    public string? LaunchUrl { get; set; }
+
+    /// The form-fields dictionary the bridge actually POSTed to MCG, JSON-serialized.
+    /// Includes the messageHash and every Dev Guide §4 field that was sent.
+    public string? OutboundFieldsJson { get; set; }
+
+    /// The raw <CwqiMessage> XML the bridge received from MCG (or stub) on the post-back.
+    public string? McgResponseXml { get; set; }
 }

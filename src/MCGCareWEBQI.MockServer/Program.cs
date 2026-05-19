@@ -26,6 +26,7 @@ builder.Services.AddMudServices();
 builder.Services.Configure<McgOptions>(builder.Configuration.GetSection(McgOptions.SectionName));
 
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<McgSessionStore>();
 builder.Services.AddSingleton<ReconcileService>();
 
@@ -43,6 +44,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
+// When this server is fronted by the bridge's reverse proxy (dock-mode iframe),
+// YARP forwards an X-Mcg-Prefix header. Honor it so that NavigationManager,
+// <base href>, and Location redirects all carry the /__mcg prefix back to the browser.
+app.Use((ctx, next) =>
+{
+    if (ctx.Request.Headers.TryGetValue("X-Mcg-Prefix", out var prefix) && !string.IsNullOrEmpty(prefix))
+    {
+        ctx.Request.PathBase = new PathString(prefix.ToString());
+    }
+    return next();
+});
 
 app.MapStaticAssets();
 app.UseAntiforgery();

@@ -14,7 +14,7 @@
 }
 else
 {
-    <div class="breadcrumb"><a href="@($"/cwqi/login/{SessionId}")">Home</a> &gt; Search</div>
+    <div class="breadcrumb"><a href="@($"cwqi/login/{SessionId}")">Home</a> &gt; Search</div>
 
     <div style="display:flex; gap:18px; align-items:flex-end; padding:6px 0 14px 0;">
         <div>
@@ -69,15 +69,15 @@ else
     protected override void OnInitialized()
     {
         _session = Store.Get(SessionId);
-        _rows = MCGCareWEBQI.MockServer.Data.DiabetesM130Seed.DiabetesSearchResults();
+        var firstCode = _session?.EpisodeCodes?.Split('|', '$').FirstOrDefault();
+        _rows = MCGCareWEBQI.MockServer.Data.GuidelineSeeds.SearchByCode(firstCode);
     }
 
     private void Select(GuidelineSearchRow row)
     {
         if (_session is null) return;
-        // For the demo, only M-130 has a real criteria tree; everything else routes back to M-130.
-        _session.SelectedGuideline = MCGCareWEBQI.MockServer.Data.DiabetesM130Seed.Build();
+        _session.SelectedGuideline = MCGCareWEBQI.MockServer.Data.GuidelineSeeds.LoadGuideline(row.Code);
         Store.Save(_session);
-        Nav.NavigateTo($"/cwqi/episode/{SessionId}", forceLoad: false);
+        Nav.NavigateTo($"cwqi/episode/{SessionId}", forceLoad: false);
     }
 }

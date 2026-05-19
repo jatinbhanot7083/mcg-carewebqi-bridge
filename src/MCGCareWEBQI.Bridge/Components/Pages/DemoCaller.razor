@@ -1,193 +1,370 @@
 @page "/demo"
-@layout GuidingCareLayout
+@layout EvokeConnectLayout
 @rendermode InteractiveServer
+@implements IDisposable
 
-<PageTitle>GuidingCare &mdash; Decisions</PageTitle>
+<PageTitle>EvokeConnect &mdash; Decision Review</PageTitle>
 
-<!-- Decision Review header card -->
-<div class="gc-card">
-    <div class="gc-card-header">
-        <span class="material-symbols-rounded" style="color:#1565c0;">fact_check</span>
-        Decision Review and Approval for Authorization ID: 1109SYY0F
-        <span style="flex:1;"></span>
-        <span style="font-weight:400; font-size:0.82rem;">
-            Decision Count <strong style="color:#0b2545;">1</strong> &nbsp;
-            Pending Decision <strong style="color:#0b2545;">1</strong> &nbsp;
-            Auth owner <strong style="color:#0b2545;">Arun Katpally</strong> &nbsp;
-            Auth Priority <strong style="color:#0b2545;">N/A</strong>
-        </span>
+<!-- Authorization context strip (the "drop" the decision sits against) -->
+<div class="ec-auth-strip">
+    <div class="auth-id">
+        <span class="material-symbols-rounded" style="color:#5eead4;">badge</span>
+        <span>Authorization</span> <code>1109SYY0F</code>
     </div>
-    <div class="gc-card-body" style="padding:0;">
-        <div style="overflow-x:auto;">
-            <table class="gc-table" style="min-width:1200px;">
-                <thead>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <th>Decision Group</th><th>Review</th><th>SCA</th>
-                        <th>Decision Status</th><th>Status Code</th>
-                        <th>Is Primary</th><th>Service Description</th>
-                        <th>Service Code</th><th>Modifier Code</th>
-                        <th>Unit Type</th><th>From Date</th><th>To Date</th>
-                        <th>Req.</th><th>Appr.</th><th>Used</th><th>Dnd.</th>
-                        <th>Freq.</th><th>Guidelines</th><th>Decision Date Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="decision-row">
-                        <td class="icon-cell">▸</td>
-                        <td>Decision 1</td>
-                        <td><select><option>Initial</option><option>Concurrent</option></select></td>
-                        <td>&nbsp;</td>
-                        <td><select><option>Pending</option><option>Approved</option><option>Denied</option></select></td>
-                        <td><select><option>Select</option><option>Medical Necessity</option></select></td>
-                        <td>☐ Primary</td>
-                        <td>Diabetes 🔍</td>
-                        <td>G8777</td>
-                        <td><input type="text" value="XX" style="max-width:50px;" /> ⓘ</td>
-                        <td><select><option>Days</option><option>Visits</option></select></td>
-                        <td><input type="text" value="05/18/2026" /></td>
-                        <td><input type="text" value="05/19/2026" /></td>
-                        <td>1</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>@(_mcgRow is null ? "N/A" : "1")</td>
-                        <td>N/A</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Authorization Totals -->
-        <div style="padding:10px 14px; background:#f1f5f9; border-top:1px solid #e2e8f0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <strong style="color:#0b2545;">Authorization Totals For Decision Service Lines</strong>
-                <span style="font-size:0.78rem; color:#475569;">Bulk Procedure Update
-                    <select style="margin-left:6px; padding:2px 4px;"><option>Select review type</option></select>
-                </span>
-            </div>
-            <div class="gc-totals">
-                <span class="chip">Recommended Units <strong>&nbsp;</strong></span>
-                <span class="chip">Current Hours from OPS <strong>&nbsp;</strong></span>
-                <span class="chip">Previously Approved Units <strong>&nbsp;</strong></span>
-                <span class="chip">Total Requested Days <strong>1</strong></span>
-                <span class="chip">Total Approved Days <strong>&nbsp;</strong></span>
-                <span class="chip">Total Used Days <strong>&nbsp;</strong></span>
-                <span class="chip">Other Requested Units <strong>&nbsp;</strong></span>
-                <span class="chip">Other Approved Units <strong>&nbsp;</strong></span>
-                <span class="chip">Other Used Units <strong>&nbsp;</strong></span>
-            </div>
-            <div style="text-align:right; margin-top:10px;">
-                <label style="margin-right:8px;"><input type="checkbox" /> </label>
-                <button class="mcg-btn" style="background:#f5f5f5; border:1px solid #9e9e9e; padding:5px 18px;">💾 Save</button>
-                <button class="mcg-btn" style="background:#f5f5f5; border:1px solid #9e9e9e; padding:5px 18px; margin-left:6px;">⊘ Cancel</button>
-            </div>
-        </div>
+    <span class="auth-pill pending">Pending review</span>
+    <div class="auth-meta">
+        <span><strong>Donald W Charleston</strong></span> <span>·</span>
+        <span>Member <code style="background:rgba(255,255,255,0.08); padding:1px 6px; border-radius:3px;">AH00000253</code></span> <span>·</span>
+        <span>Service <strong>G8777</strong> Diabetes inpatient</span> <span>·</span>
+        <span>Dates 05/18 → 05/19/2026</span> <span>·</span>
+        <span>Owner <strong>demo.user</strong></span>
+    </div>
+    <div class="auth-actions">
+        <button>Save draft</button>
+        <button class="primary">Submit decision</button>
     </div>
 </div>
 
-<!-- Decision Support panel -->
-<div class="gc-card">
-    <div class="gc-card-header">
-        <span class="material-symbols-rounded" style="color:#1565c0;">support</span>
-        Decision Support
+<!-- Decision Review and Approval card -->
+<div class="ec-card">
+    <div class="ec-card-hd">
+        <span class="material-symbols-rounded" style="color:#4f46e5;">gavel</span>
+        <div>
+            <div class="ec-card-title">Decision Review and Approval</div>
+            <div class="ec-card-sub">1 decision &middot; 1 pending &middot; Priority Standard</div>
+        </div>
+        <span style="margin-left:auto; display:flex; gap:6px; align-items:center; color:#64748b; font-size:0.82rem;">
+            <span class="material-symbols-rounded" style="font-size:1rem;">schedule</span>
+            Last touched: today
+        </span>
     </div>
-    <div class="gc-card-body" style="padding:0;">
-        <div class="gc-tabs" style="padding:0 14px;">
-            <span class="t">Decision Support</span>
-            <span class="t">Notes</span>
-            <span class="t active">Run Guidelines</span>
-            <span class="t">Service Plan Summary</span>
-            <span class="t">Additional Information</span>
+
+    <div class="ec-decision-grid">
+        <div class="dg-cell"><label>Decision group</label><span class="v">Decision 1</span></div>
+        <div class="dg-cell">
+            <label>Review type</label>
+            <select><option>Initial</option><option>Concurrent</option><option>Retrospective</option></select>
+        </div>
+        <div class="dg-cell">
+            <label>Decision status</label>
+            <select><option>Pending</option><option>Approved</option><option>Denied</option><option>Partial</option></select>
+        </div>
+        <div class="dg-cell">
+            <label>Status code</label>
+            <select><option>Select…</option><option>Medical necessity</option><option>Benefit limit</option></select>
+        </div>
+        <div class="dg-cell"><label>Service</label><span class="v">Diabetes inpatient admission</span></div>
+        <div class="dg-cell"><label>Service code</label><span class="v" style="font-family:'JetBrains Mono',monospace;">G8777</span></div>
+        <div class="dg-cell"><label>Modifier</label><span class="v" style="font-family:'JetBrains Mono',monospace;">XX</span></div>
+        <div class="dg-cell"><label>Unit type</label>
+            <select><option>Days</option><option>Visits</option><option>Units</option></select>
+        </div>
+        <div class="dg-cell"><label>From date</label><input type="text" value="05/18/2026" /></div>
+        <div class="dg-cell"><label>To date</label><input type="text" value="05/19/2026" /></div>
+        <div class="dg-cell"><label>Requested</label><span class="v">1 day</span></div>
+        <div class="dg-cell"><label>Decision date / time</label><span class="v" style="color:#94a3b8;">—</span></div>
+    </div>
+
+    <div class="ec-auth-totals">
+        <div class="t highlight"><span class="lbl">Total requested days</span><span class="val">1</span></div>
+        <div class="t"><span class="lbl">Total approved days</span><span class="val">—</span></div>
+        <div class="t"><span class="lbl">Total used days</span><span class="val">—</span></div>
+        <div class="t"><span class="lbl">Recommended units</span><span class="val">—</span></div>
+        <div class="t"><span class="lbl">Previously approved</span><span class="val">0</span></div>
+        <div class="t"><span class="lbl">Hours from OPS</span><span class="val">—</span></div>
+    </div>
+</div>
+
+<!-- Clinical Decision Support panel -->
+<div class="ec-card">
+    <div class="ec-card-hd">
+        <span class="material-symbols-rounded" style="color:#4f46e5;">psychology</span>
+        <div>
+            <div class="ec-card-title">Decision Support</div>
+            <div class="ec-card-sub">Run evidence-based criteria and attach the result to this decision</div>
+        </div>
+        <span style="margin-left:auto;" class="ec-chip @(_row is null ? "unset" : (_row.Status == "Met" ? "met" : (_row.Status == "Failed" ? "notmet" : "info")))">
+            @(_row is null ? "Not yet run" : _row.Status)
+        </span>
+    </div>
+
+    <div class="ec-card-pad">
+        <div class="ec-tabs">
+            <div class="t">Decision Support</div>
+            <div class="t">Notes</div>
+            <div class="t active">Run Guidelines</div>
+            <div class="t">Service Plan</div>
+            <div class="t">Additional Information</div>
         </div>
 
-        <div style="padding:14px;">
-            <!-- Internal Guideline Summary -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <strong style="color:#0b2545; font-size:0.92rem;">Internal Guideline Summary</strong>
-                <button class="gc-add-btn"><span class="material-symbols-rounded">play_circle</span> Run Script</button>
-            </div>
-            <table class="gc-table">
-                <thead>
-                    <tr><th>Script Name</th><th>Staff Name</th><th>Initiated On</th><th>Total Score Received</th><th>Completed On</th><th>Status</th><th>View Response</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:14px;">No Records Found</td></tr>
-                </tbody>
-            </table>
+        <!-- Internal Guideline Summary -->
+        <div class="ec-extg-bar">
+            <h4>Internal Guideline Summary</h4>
+            <button class="ec-btn-secondary">
+                <span class="material-symbols-rounded" style="font-size:1rem;">play_arrow</span>
+                Run Script
+            </button>
+        </div>
+        <div style="padding:14px; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:8px; color:#94a3b8; text-align:center; font-size:0.85rem;">
+            No internal scripts run yet.
+        </div>
 
-            <!-- External Guidelines -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin:18px 0 8px 0;">
-                <strong style="color:#0b2545; font-size:0.92rem;">External Guidelines</strong>
-                <div>
-                    <button class="gc-add-btn"><span class="material-symbols-rounded">add_circle</span> Add InterQual</button>
-                    <button class="gc-add-btn" @onclick="OpenMcgPopup">
-                        <span class="material-symbols-rounded" style="color:#5fb15c;">add_circle</span>
-                        Add MCG
+        <!-- External Guidelines section -->
+        <div class="ec-extg-bar" style="margin-top:18px;">
+            <h4>External Guidelines</h4>
+            <span style="color:#94a3b8; font-size:0.78rem;">InterQual integration not configured for this case</span>
+        </div>
+
+        <!-- States: launch controls (default) | popup running | docked | result -->
+        @if (_popupOpen)
+        {
+            <!-- Popup running externally — let user pull session back -->
+            <div class="ec-launch-zone" style="border-color:#fcd34d; background:linear-gradient(135deg,#fef3c7 0%,#fef9c3 100%);">
+                <div class="lz-title" style="color:#92400e;">
+                    <span class="material-symbols-rounded" style="font-size:1.2rem; vertical-align:middle;">open_in_new</span>
+                    MCG is running in a separate window
+                </div>
+                <div class="lz-sub">
+                    The clinician is documenting in a popup. Pull that exact session back into this panel —
+                    selections and current page are preserved.
+                </div>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button class="ec-btn-primary" @onclick="DockFromPopup">
+                        <span class="material-symbols-rounded" style="font-size:1.1rem;">dock_to_right</span>
+                        <span>Dock in panel</span>
+                    </button>
+                    <button class="ec-btn-secondary" @onclick="ClosePopup">
+                        <span class="material-symbols-rounded" style="font-size:1rem;">close</span>
+                        Cancel popup
                     </button>
                 </div>
             </div>
-            <table class="gc-table">
-                <thead>
-                    <tr><th>Guideline Name</th><th>Episode ID</th><th>Requested/Recommended Service Codes</th><th>Criteria Result</th><th>Criteria Result Description</th><th>Criteria Status</th><th>View Documentation</th><th>View Episode Summary</th></tr>
-                </thead>
-                <tbody>
-                    @if (_mcgRow is null)
-                    {
-                        <tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:14px;">No items to display</td></tr>
-                    }
-                    else
-                    {
-                        <tr>
-                            <td><strong>@_mcgRow.GuidelineName</strong></td>
-                            <td><code>@_mcgRow.EpisodeId</code></td>
-                            <td>@_mcgRow.ServiceCodes</td>
-                            <td>
-                                <span class="gc-status-pill @(_mcgRow.Status == "Met" ? "met" : (_mcgRow.Status == "NotMet" ? "notmet" : "pending"))">
-                                    @_mcgRow.Status
-                                </span>
-                            </td>
-                            <td>@_mcgRow.ResultDescription</td>
-                            <td>@_mcgRow.Status</td>
-                            <td><a href="#" @onclick="ToggleRaw" @onclick:preventDefault>View</a></td>
-                            <td><a href="#" @onclick="ToggleRaw" @onclick:preventDefault>View</a></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        }
+        else if (_isDocked)
+        {
+            <!-- Docked: side-panel layout with Focus mode + Pop out -->
+            <div class="ec-dock-split" style="margin-top:14px;">
+                <aside class="ec-side-info">
+                    <div class="ec-label" style="color:#4f46e5;">MCG SESSION</div>
+                    <h4 style="margin-top:6px;">Documentation in progress</h4>
+                    <p>Clinician is in <strong>MCG CareWebQI</strong> on the right.
+                       The case context stays anchored here so it&rsquo;s never lost.</p>
 
-            @if (_showRaw && _mcgRow is not null)
-            {
-                <div style="margin-top:14px; padding:12px; background:#0f172a; color:#5eead4; border-radius:4px; font-size:0.78rem; max-height:24rem; overflow:auto; font-family:'JetBrains Mono', monospace; white-space:pre-wrap; word-break:break-all;">@_resultJson</div>
-            }
+                    <div class="ec-label" style="margin-top:14px;">CONTEXT</div>
+                    <p style="margin-top:4px;">
+                        <strong>Donald W Charleston</strong><br/>
+                        Member <code>AH00000253</code><br/>
+                        Auth <code>1109SYY0F</code> · G8777 · 1 day
+                    </p>
 
-            <div style="margin-top:14px; padding:14px; background:#fafafa; border:1px dashed #cbd5e1; border-radius:4px; color:#64748b; font-size:0.85rem;">
-                <strong style="color:#0f172a;">How it works:</strong>
-                Clicking <strong style="color:#1565c0;">+ Add MCG</strong> opens the MCG CareWebQI popup. The clinician documents indications and clicks <em>Exit Episode</em>.
-                MCG posts a <code>CwqiMessage</code> back to the bridge's <code>/receive</code> endpoint, which parses, persists, calls <code>Reconcile.asmx</code> to ACK,
-                then sends the structured result back to this page via <code>window.postMessage</code>.
+                    <div class="ec-label" style="margin-top:14px;">PANEL CONTROLS</div>
+                    <ul class="checklist" style="margin-top:4px; padding:0;">
+                        <li><strong>Focus</strong> expands the panel to fill the screen, Power-BI style.</li>
+                        <li><strong>Pop out</strong> moves MCG to a separate window — current page preserved.</li>
+                        <li><strong>Cancel</strong> closes the session without saving.</li>
+                    </ul>
+
+                    <div style="margin-top:18px; padding:10px 12px; background:rgba(99,102,241,0.08); border-left:3px solid #4f46e5; border-radius:6px; font-size:0.78rem; color:#3730a3;">
+                        EvokeConnect keeps MCG docked inside the case and lets you switch freely between dock, focus and popup — current page and selections are preserved across every mode.
+                    </div>
+                </aside>
+
+                <div id="mcg-panel" class="ec-mcg-panel @(_focusMode ? "focus" : "")">
+                    <div class="ec-mcg-panel-hd">
+                        <span class="title">
+                            <span class="material-symbols-rounded" style="font-size:1rem;">cable</span>
+                            MCG CareWebQI &mdash; live session
+                        </span>
+                        <span class="sep"></span>
+                        <span style="color:#94a3b8; font-size:0.78rem;">Click <strong style="color:#ffffff;">Exit Episode</strong> inside MCG when finished.</span>
+                        <span style="margin-left:auto;"></span>
+                        <button class="iconbtn" @onclick="ToggleFocus" title="@(_focusMode ? "Exit focus mode" : "Focus mode")">
+                            <span class="material-symbols-rounded">@(_focusMode ? "close_fullscreen" : "open_in_full")</span>
+                            @(_focusMode ? "Exit focus" : "Focus")
+                        </button>
+                        <button class="iconbtn" @onclick="PopOutFromDock" title="Pop out — preserves current MCG page">
+                            <span class="material-symbols-rounded">open_in_new</span>
+                            Pop out
+                        </button>
+                        <button class="iconbtn" @onclick="CloseDock" title="Cancel session">
+                            <span class="material-symbols-rounded">close</span>
+                            Cancel
+                        </button>
+                    </div>
+                    <iframe id="mcg-frame" class="ec-dock-frame" src="@_launchUrl" title="MCG CareWebQI"></iframe>
+                </div>
             </div>
-        </div>
+        }
+        else if (_row is null)
+        {
+            <!-- Default state: launch controls inline, no extra click needed -->
+            <div class="ec-launch-zone" style="margin-top:14px; padding:16px 22px;">
+                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                    <div style="text-align:left; flex:1; min-width:240px;">
+                        <div class="lz-title" style="margin:0;">MCG CareWebQI</div>
+                        <div class="lz-sub" style="margin:2px 0 0 0;">
+                            Document indications against evidence-based guidelines. Result attaches to this decision.
+                        </div>
+                    </div>
+                    <div class="ec-mode-toggle">
+                        <button class="@(_dockedMode ? "active" : "")" @onclick="@(() => _dockedMode = true)">
+                            <span class="material-symbols-rounded" style="font-size:1rem; vertical-align:middle;">dock_to_right</span>
+                            Dock
+                        </button>
+                        <button class="@(!_dockedMode ? "active" : "")" @onclick="@(() => _dockedMode = false)">
+                            <span class="material-symbols-rounded" style="font-size:1rem; vertical-align:middle;">open_in_new</span>
+                            Pop out
+                        </button>
+                    </div>
+                    <button class="ec-btn-primary" @onclick="LaunchMcg">
+                        <span class="material-symbols-rounded" style="font-size:1.1rem;">rocket_launch</span>
+                        <span>Launch MCG</span>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Most recent review row (after completion) -->
+        @if (_row is not null)
+        {
+            <div style="margin-top:18px;">
+                <div class="ec-label" style="margin-bottom:8px;">Most recent MCG review</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:16px; padding:14px 18px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; align-items:center;">
+                    <div>
+                        <div class="ec-label">Guideline</div>
+                        <div class="ec-value">@_row.GuidelineName</div>
+                    </div>
+                    <div>
+                        <div class="ec-label">Episode ID</div>
+                        <div class="ec-value" style="font-family:'JetBrains Mono',monospace; font-size:0.85rem;">@_row.EpisodeId</div>
+                    </div>
+                    <div>
+                        <div class="ec-label">Outcome</div>
+                        <div class="ec-value">
+                            <span class="ec-chip @(_row.Status == "Met" ? "met" : (_row.Status == "Failed" ? "notmet" : "unset"))">@_row.Status</span>
+                            <span style="color:#64748b; font-size:0.85rem; margin-left:6px;">@_row.ResultDescription</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="ec-btn-secondary" @onclick="ReLaunch">Re-run</button>
+                        <button class="ec-btn-secondary" @onclick="ToggleTrace">@(_showTrace ? "Hide trace" : "View trace")</button>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
+
+<!-- Integration trace (developer USP) -->
+@if (_row is not null && _showTrace)
+{
+    <div class="ec-trace">
+        <div class="ec-trace-hd">
+            <span class="material-symbols-rounded" style="color:#5eead4;">monitoring</span>
+            <span><span class="lbl">Integration trace</span> &middot; what just happened on the wire</span>
+            <span style="margin-left:auto; color:#64748b; font-size:0.78rem;">TXN <span style="color:#5eead4; font-family:'JetBrains Mono',monospace;">@_row.TransactionId</span></span>
+        </div>
+        <div class="ec-trace-bd">
+            <details class="ec-trace-section" open>
+                <summary>1 — Launch URL (caller → bridge)</summary>
+                <pre>@(_row.LaunchUrl ?? "(unavailable)")</pre>
+            </details>
+            <details class="ec-trace-section">
+                <summary>2 — Signed form fields POSTed to MCG (Dev Guide §4)</summary>
+                <pre>@(PrettyJson(_row.OutboundFieldsJson) ?? "(unavailable)")</pre>
+            </details>
+            <details class="ec-trace-section">
+                <summary>3 — CwqiMessage XML returned by MCG (Dev Guide §5)</summary>
+                <pre>@(_row.McgResponseXml ?? "(unavailable)")</pre>
+            </details>
+            <details class="ec-trace-section">
+                <summary>4 — IntegrationResult JSON delivered back to caller</summary>
+                <pre>@_row.RawJson</pre>
+            </details>
+        </div>
+    </div>
+}
 
 <script>
   (function () {
     window.addEventListener('message', function (event) {
-      if (event.data && event.data.source === 'mcg-bridge') {
-        var p = event.data.payload || {};
-        var g = (p.mcgResponse && p.mcgResponse.guidelines && p.mcgResponse.guidelines[0]) || null;
-        var first = g && g.outlines ? g.outlines.find(function(o){ return o.status === 'Met'; }) : null;
-        DotNet.invokeMethodAsync('MCGCareWEBQI.Bridge', 'McgPopupCompleted', JSON.stringify({
-            GuidelineName:    g ? g.title : 'Diabetes',
-            EpisodeId:        (p.mcgResponse && p.mcgResponse.episodeId) || 'unknown',
-            ServiceCodes:     'G8777',
-            Status:           g && g.outlines && g.outlines.some(function(o){ return o.status === 'Met'; }) ? 'Met' : (p.status === 'Failed' ? 'Failed' : 'Unset'),
-            ResultDescription: first ? first.name : (p.status || ''),
-            Raw:              JSON.stringify(p, null, 2)
-        }));
-      }
+      if (!event.data) return;
+
+      // (A) "Dock back" signal from popup-frame
+      if (__ecHandleDockSignal(event.data)) return;
+
+      // (B) MCG completion result
+      if (event.data.source !== 'mcg-bridge') return;
+      var p = event.data.payload || {};
+      var g = (p.mcgResponse && p.mcgResponse.guidelines && p.mcgResponse.guidelines[0]) || null;
+      var firstMet = g && g.outlines ? g.outlines.find(function(o){ return o.status === 'Met'; }) : null;
+      var anyMet   = g && g.outlines && g.outlines.some(function(o){ return o.status === 'Met'; });
+      DotNet.invokeMethodAsync('MCGCareWEBQI.Bridge', 'McgPopupCompleted', JSON.stringify({
+          TransactionId:     p.transactionId || '',
+          GuidelineName:     g ? g.title : 'Diabetes',
+          EpisodeId:         (p.mcgResponse && p.mcgResponse.episodeId) || 'unknown',
+          ServiceCodes:      'G8777',
+          Status:            anyMet ? 'Met' : (p.status === 'Failed' ? 'Failed' : (p.status || 'Unset')),
+          ResultDescription: firstMet ? firstMet.name : (p.status || ''),
+          LaunchUrl:         p.launchUrl || '',
+          OutboundFieldsJson:p.outboundFieldsJson || '',
+          McgResponseXml:    p.mcgResponseXml || '',
+          RawJson:           JSON.stringify(p, null, 2)
+      }));
     });
-    window.__mcgBridgeDemoOpen = function (url) {
-      window.open(url, 'mcg-popup', 'width=1280,height=860,menubar=no,toolbar=no');
+    // Same-origin BroadcastChannel — primary mechanism for popup ↔ parent signaling.
+    var __ecBc = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('mcg-dock') : null;
+
+    function __ecHandleDockSignal(data) {
+      if (!data || data.source !== 'mcg-bridge-popup' || data.action !== 'dock-back') return false;
+      console.log('[ec] dock-back signal received via', __ecBc && data._bc ? 'BroadcastChannel' : 'postMessage', 'url=', data.url);
+      DotNet.invokeMethodAsync('MCGCareWEBQI.Bridge', 'DockFromPopupMessage', data.url || '')
+          .catch(function (err) { console.error('[ec] DockFromPopupMessage invoke failed', err); });
+      return true;
+    }
+    if (__ecBc) {
+      __ecBc.addEventListener('message', function (e) {
+        var d = e.data; if (d) { d._bc = true; __ecHandleDockSignal(d); }
+        // Also forward MCG completion messages that came via BroadcastChannel
+        if (d && d.source === 'mcg-bridge') window.dispatchEvent(new MessageEvent('message', { data: d }));
+      });
+    }
+
+    window.__mcgPopup = null;
+    window.__mcgBridgePopupOpen = function (url) {
+      // Wrap in /popup-frame so the popup gets a "Dock back" header bar.
+      var wrapped = '/popup-frame?launchUrl=' + encodeURIComponent(url);
+      window.__mcgPopup = window.open(wrapped, 'mcg-popup', 'width=1280,height=860,menubar=no,toolbar=no');
+    };
+    // Ask the popup to send us its inner URL and close itself.
+    window.__mcgPopupAskForDockBack = function () {
+      var payload = { source:'mcg-bridge-opener', action:'request-dock-back' };
+      if (__ecBc) { try { __ecBc.postMessage(payload); } catch (e) {} }
+      if (window.__mcgPopup && !window.__mcgPopup.closed) {
+        try { window.__mcgPopup.postMessage(payload, '*'); }
+        catch (e) { console.warn('[ec] cant ask popup to dock back', e); }
+      }
+    };
+    window.__mcgPopupReadUrlAndClose = function () {
+      var p = window.__mcgPopup;
+      if (!p || p.closed) { window.__mcgPopup = null; return null; }
+      var u = null;
+      try { u = p.location.href; } catch (e) { console.warn('[ec] cross-origin popup, cannot read URL', e); }
+      try { p.close(); } catch (e) {}
+      window.__mcgPopup = null;
+      return u;
+    };
+    window.__mcgPopupClose = function () {
+      if (window.__mcgPopup && !window.__mcgPopup.closed) {
+        try { window.__mcgPopup.close(); } catch (e) {}
+      }
+      window.__mcgPopup = null;
+    };
+    window.__mcgIframeReadUrl = function () {
+      var f = document.getElementById('mcg-frame');
+      if (!f || !f.contentWindow) return null;
+      try { return f.contentWindow.location.href; }
+      catch (e) { console.warn('[ec] cross-origin iframe, cannot read URL', e); return null; }
     };
   })();
 </script>
@@ -195,35 +372,167 @@
 @code {
     private static System.Collections.Concurrent.ConcurrentDictionary<string, McgRow> _rows = new();
     private static event Action? _onUpdate;
-    private McgRow? _mcgRow;
-    private bool _showRaw;
-    private string _resultJson = "";
+
+    private McgRow? _row;
+    private bool _dockedMode = true;     // default: dock-in-panel
+    private bool _isDocked   = false;    // currently rendering iframe
+    private bool _focusMode  = false;    // panel expanded to fullscreen (Power BI focus mode)
+    private bool _popupOpen  = false;    // popup window currently has the MCG session
+    private bool _showTrace  = true;
+    private string _launchUrl = "";
 
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
     protected override void OnInitialized()
     {
         _onUpdate += Refresh;
-        if (_rows.TryGetValue("latest", out var r)) { _mcgRow = r; _resultJson = r.Raw; }
+        // Don't replay an already-delivered dock-back signal when this instance mounts.
+        _consumedDockVersion = _dockVersion;
+        if (_rows.TryGetValue("latest", out var r)) _row = r;
     }
 
     public void Dispose() => _onUpdate -= Refresh;
 
-    private void Refresh() => InvokeAsync(StateHasChanged);
+    private void Refresh()
+    {
+        if (_rows.TryGetValue("latest", out var r))
+        {
+            _row       = r;
+            _isDocked  = false;
+            _focusMode = false;
+            _popupOpen = false;
+            _showTrace = true;
+        }
 
-    private async Task OpenMcgPopup()
+        // Check whether a dock-back signal newer than this instance's last-consumed version exists.
+        // Each component instance reads the version independently — one stale subscriber can't
+        // steal the signal from the live page.
+        long latestVersion; string? dockUrl;
+        lock (_dockSync) { latestVersion = _dockVersion; dockUrl = _latestDockUrl; }
+        if (latestVersion > _consumedDockVersion)
+        {
+            _consumedDockVersion = latestVersion;
+            Console.WriteLine($"[ec] Dock-back consumed v{latestVersion}. url='{dockUrl}' instance={GetHashCode()}");
+            _popupOpen = false;
+            if (!string.IsNullOrEmpty(dockUrl))
+            {
+                try { _launchUrl = new Uri(dockUrl).PathAndQuery; }
+                catch { /* keep existing _launchUrl */ }
+            }
+            _isDocked  = true;
+            _focusMode = false;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LaunchMcg()
     {
         var txnId = Guid.NewGuid().ToString();
-        var url   = $"/launch?callerId=guidingcare&callerTxnId={txnId}"
+        // Always use dock=true so popup AND iframe stay same-origin (via the bridge proxy),
+        // which lets the parent read window.location to preserve state across mode switches.
+        _launchUrl = $"/launch?callerId=evokeconnect&callerTxnId={txnId}"
                   + "&patientId=AH00000253&patientFirstName=Donald&patientMI=W&patientLastName=Charleston"
                   + "&patientDateOfBirth=01/15/1980&patientGender=Male"
                   + "&episodeType=Inpatient"
                   + $"&episodeAdmitDate={DateTime.Today:MM/dd/yyyy}"
-                  + "&episodeCodes=E08.44|icd10cm";
-        await JS.InvokeVoidAsync("__mcgBridgeDemoOpen", url);
+                  + "&episodeCodes=E08.44%7Cicd10cm"
+                  + "&dock=true";
+
+        if (_dockedMode)
+        {
+            _isDocked = true;
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("__mcgBridgePopupOpen", _launchUrl);
+            _popupOpen = true;
+        }
     }
 
-    private void ToggleRaw() => _showRaw = !_showRaw;
+    private void CloseDock()
+    {
+        _isDocked  = false;
+        _focusMode = false;
+        _launchUrl = "";
+    }
+
+    private void ToggleFocus() => _focusMode = !_focusMode;
+
+    /// Move the currently-docked session into a popup window, preserving the iframe's current page.
+    private async Task PopOutFromDock()
+    {
+        if (string.IsNullOrEmpty(_launchUrl)) return;
+
+        // Grab the iframe's CURRENT URL so the popup opens at the exact same MCG page,
+        // not at the original /launch entry.
+        string popupUrl = _launchUrl;
+        var current = await JS.InvokeAsync<string?>("__mcgIframeReadUrl");
+        if (!string.IsNullOrEmpty(current))
+        {
+            try { popupUrl = new Uri(current).PathAndQuery; }
+            catch { /* keep original launch URL on failure */ }
+        }
+
+        _isDocked  = false;
+        _focusMode = false;
+        await JS.InvokeVoidAsync("__mcgBridgePopupOpen", popupUrl);
+        _popupOpen = true;
+    }
+
+    /// Pull the popup session back into the docked panel, preserving where the clinician left off.
+    /// Sends a postMessage to the popup asking it to surrender its inner URL and close itself.
+    /// The popup's reply triggers DockFromPopupMessage (JSInvokable) below.
+    private async Task DockFromPopup()
+    {
+        await JS.InvokeVoidAsync("__mcgPopupAskForDockBack");
+        // The popup will respond via postMessage → JS listener → DockFromPopupMessage.
+    }
+
+    /// Invoked from JS when the popup sends back its current inner-iframe URL.
+    /// Also handles the case where the clinician clicked "Dock back" *inside* the popup.
+    [JSInvokable]
+    public static Task DockFromPopupMessage(string? url)
+    {
+        lock (_dockSync) { _latestDockUrl = url; _dockVersion++; }
+        _onUpdate?.Invoke();
+        return Task.CompletedTask;
+    }
+
+    /// Tracks the most recent dock-back URL plus a version number. Each component instance
+    /// remembers the version it has already consumed, so subscribers can each see the same
+    /// signal exactly once without one stale subscriber stealing it from the live page.
+    private static readonly object _dockSync = new();
+    private static string? _latestDockUrl;
+    private static long    _dockVersion;
+    private long _consumedDockVersion;
+
+    private async Task ClosePopup()
+    {
+        await JS.InvokeVoidAsync("__mcgPopupClose");
+        _popupOpen = false;
+        _launchUrl = "";
+    }
+
+    private async Task ReLaunch()
+    {
+        _row = null;
+        _rows.TryRemove("latest", out _);
+        await Task.CompletedTask;
+    }
+
+    private void ToggleTrace() => _showTrace = !_showTrace;
+
+    private static string? PrettyJson(string? json)
+    {
+        if (string.IsNullOrEmpty(json)) return null;
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            return System.Text.Json.JsonSerializer.Serialize(doc.RootElement,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch { return json; }
+    }
 
     [JSInvokable]
     public static Task McgPopupCompleted(string json)
@@ -237,11 +546,15 @@
 
     public sealed class McgRow
     {
-        public string GuidelineName     { get; set; } = "";
-        public string EpisodeId         { get; set; } = "";
-        public string ServiceCodes      { get; set; } = "";
-        public string Status            { get; set; } = "";
-        public string ResultDescription { get; set; } = "";
-        public string Raw               { get; set; } = "";
+        public string TransactionId      { get; set; } = "";
+        public string GuidelineName      { get; set; } = "";
+        public string EpisodeId          { get; set; } = "";
+        public string ServiceCodes       { get; set; } = "";
+        public string Status             { get; set; } = "";
+        public string ResultDescription  { get; set; } = "";
+        public string LaunchUrl          { get; set; } = "";
+        public string OutboundFieldsJson { get; set; } = "";
+        public string McgResponseXml     { get; set; } = "";
+        public string RawJson            { get; set; } = "";
     }
 }

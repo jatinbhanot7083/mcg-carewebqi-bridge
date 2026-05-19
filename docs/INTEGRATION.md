@@ -1,8 +1,8 @@
 # Integrating a calling application with the MCG Bridge
 
-This document is for engineers building a **caller** (e.g. EvokeConnect, GuidingCare,
-or any other system). It describes the public contract: how to launch a documentation
-session and how to receive the result.
+This document is for engineers building a **caller** (e.g. EvokeConnect or any other
+host system). It describes the public contract: how to launch a documentation session
+and how to receive the result.
 
 The contract is intentionally HTTP + query string + JSON. No SDK, no DLL.
 

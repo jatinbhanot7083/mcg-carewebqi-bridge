@@ -116,10 +116,10 @@ else
     private void OpenDocument()
     {
         if (_session?.SelectedGuideline is not null)
-            Nav.NavigateTo($"/cwqi/document/{SessionId}/{_session.SelectedGuideline.Code}", forceLoad: false);
+            Nav.NavigateTo($"cwqi/document/{SessionId}/{_session.SelectedGuideline.Code}", forceLoad: false);
     }
 
-    private void AddGuidelines() => Nav.NavigateTo($"/cwqi/search/{SessionId}", forceLoad: false);
+    private void AddGuidelines() => Nav.NavigateTo($"cwqi/search/{SessionId}", forceLoad: false);
 
     private void RemoveGuideline()
     {
@@ -133,6 +133,6 @@ else
         if (_session is null) return;
         _session.Exited = true;
         Store.Save(_session);
-        Nav.NavigateTo($"/exit/{SessionId}", forceLoad: true);
+        Nav.NavigateTo($"exit/{SessionId}", forceLoad: true);
     }
 }

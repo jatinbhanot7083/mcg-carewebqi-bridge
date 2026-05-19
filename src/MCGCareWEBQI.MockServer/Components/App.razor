@@ -1,10 +1,20 @@
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor Ctx
+
+@{
+    // Honor X-Forwarded-Prefix when the mock is fronted by the bridge's reverse proxy
+    // (dock-mode). Without this, Blazor's NavigationManager builds URLs relative to "/"
+    // and breaks out of the proxied path, sending the iframe to a non-existent bridge route.
+    var pathBase = Ctx.HttpContext?.Request.PathBase.Value ?? "";
+    var baseHref = string.IsNullOrEmpty(pathBase) ? "/" : pathBase.TrimEnd('/') + "/";
+}
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
+    <base href="@baseHref" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Source+Serif+Pro:ital,wght@1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" />
@@ -20,7 +30,7 @@
         a { color:#1565c0; text-decoration:underline; }
         a:hover { color:#0d47a1; }
 
-        /* Top brand header — MCG wordmark left, HealthEdge right */
+        /* Top brand header — MCG / CareWebQI wordmark */
         .cwqi-header { background:#ffffff; padding:14px 24px; border-bottom:2px solid #1565c0; display:flex; align-items:center; justify-content:space-between; }
         .cwqi-mark   { display:flex; align-items:center; gap:4px; }
         .cwqi-mark .leaves { width:38px; height:38px; }
@@ -28,9 +38,6 @@
         .cwqi-mark .cwqi   { font-family:'Source Serif Pro', Georgia, serif; font-style:italic; font-size:1.55rem; color:#1565c0; font-weight:700; margin-left:6px; }
         .cwqi-mark .tm     { font-size:0.55rem; color:#5fb15c; vertical-align:super; }
         .cwqi-mark .reg    { font-size:0.6rem; color:#1565c0; vertical-align:super; }
-        .healthedge        { font-weight:700; letter-spacing:0.5px; color:#1c4078; font-size:1.15rem; }
-        .healthedge .edge  { color:#1565c0; }
-        .healthedge .arrow { display:inline-block; margin-left:4px; color:#3eb6e8; }
 
         /* "Enter Documentation" pill button right below header */
         .enter-doc-bar { background:#cfd8dc; padding:8px 24px; border-bottom:1px solid #b0bec5; }

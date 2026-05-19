@@ -42,4 +42,10 @@ public sealed class McgOptions
 
     /// Response delivery method: "RedirectOnly" (recommended) or "ScriptedForm". Dev Guide §3.2.
     public string InterfaceResponseType { get; set; } = "RedirectOnly";
+
+    /// Sent on every launch as `allowPatientMerge=true|false`. Required for cert section
+    /// "Merge a patient" (CareWebQI Cert Checklist v10.0, page 82). MCG's default tenant
+    /// setting is False; cert requires True. Sent verbatim so the MCG-side merge prompt fires
+    /// when a re-launch sends the same episodeID with a different patientID.
+    public bool AllowPatientMerge { get; set; } = true;
 }

@@ -56,6 +56,20 @@ public sealed class McgMockSession
 
     public bool Exited { get; set; }
 
+    // ---- Cert: patient merge support (CWQI Cert v10.0, p82) ----
+
+    /// Set when a re-launch arrives with same episodeID but a different patientID.
+    /// While these are non-null the session is in "merge pending" state.
+    public string? PendingMergePatientId        { get; set; }
+    public string? PendingMergePatientFirstName { get; set; }
+    public string? PendingMergePatientLastName  { get; set; }
+    public string? PendingMergePatientDob       { get; set; }
+    public bool    MergeAllowed                 { get; set; }
+
+    /// Set after the clinician answered No to the merge prompt — the episode keeps
+    /// the original patient and the next launch attempt should re-trigger the prompt.
+    public string? LastMergeDecision { get; set; } // null | "yes" | "no"
+
     /// True once any criterion has been checked. Drives the "Selections Made, Indications Met" banner.
     public bool AnySelectionsMade => SelectedGuideline is not null && AnyCheckedRecursive(SelectedGuideline.RootSections);
 

@@ -1,6 +1,5 @@
 @page "/cwqi/login/{SessionId:guid}"
 @inject McgSessionStore Store
-@inject NavigationManager Nav
 
 <PageTitle>CareWebQI &mdash; Log In</PageTitle>
 
@@ -24,20 +23,27 @@ else
                     <path d="M22 38 C 24 20, 30 12, 38 10 C 30 22, 26 32, 24 38 Z" fill="#9fd99f" opacity="0.7" />
                 </svg>
                 <h2 style="color:#1565c0; margin:18px 0 6px 0; font-weight:700;">Log In</h2>
-                <p style="color:#424242; margin:0 0 24px 0;">Select the button above to access guidelines.</p>
+                <p style="color:#424242; margin:0 0 24px 0;">Select the button below to access guidelines.</p>
                 <p style="color:#757575; font-size:0.85rem; margin:0 0 28px 0;">
-                    In case of denied access, contact HealthEdge at
-                    <a href="mailto:gc_productsupport@healthedge.com">gc_productsupport@healthedge.com</a>.
+                    In case of denied access, contact support at
+                    <a href="mailto:mcgsupport@evokeconnect.com">mcgsupport@evokeconnect.com</a>.
                 </p>
-                <button class="mcg-btn" style="font-weight:600;" @onclick="EnterDocumentation">
+                <a class="mcg-btn" style="font-weight:600; text-decoration:none; display:inline-block;"
+                   href="@($"cwqi/search/{SessionId}")">
                     Enter Documentation
-                </button>
+                </a>
             </div>
         </div>
-        <div style="width:240px; padding:18px 0 0 0; color:#5b9bd5; font-size:0.9rem;">
-            <div style="font-weight:700; color:#3b7cb8; margin-bottom:8px;">Strategic Alliance Partners</div>
-            <p style="margin:0 0 10px 0;">HealthEdge and MCG have partnered to combine the power of the GuidingCare platform and MCG evidence-based clinical guidelines, to support your care management and utilization management needs.</p>
-            <p style="margin:0;">The HealthEdge GuidingCare integration with MCG CareWebQI is part of the MCG Strategic Alliance Partners program.</p>
+        <div style="width:240px; padding:18px 0 0 0; color:#3b7cb8; font-size:0.9rem;">
+            <div style="font-weight:700; color:#1565c0; margin-bottom:8px;">EvokeConnect &times; MCG</div>
+            <p style="margin:0 0 10px 0;">
+                EvokeConnect integrates MCG&rsquo;s evidence-based clinical guidelines directly into the
+                care management and utilization management workflow.
+            </p>
+            <p style="margin:0;">
+                Clinicians document indications inside CareWebQI; results post back automatically to the
+                originating EvokeConnect decision and authorization records.
+            </p>
         </div>
     </div>
 }
@@ -45,12 +51,5 @@ else
 @code {
     [Parameter] public Guid SessionId { get; set; }
     private McgMockSession? _session;
-
     protected override void OnInitialized() => _session = Store.Get(SessionId);
-
-    private void EnterDocumentation()
-    {
-        if (_session is null) return;
-        Nav.NavigateTo($"/cwqi/search/{SessionId}", forceLoad: false);
-    }
 }

@@ -1,0 +1,67 @@
+@inherits LayoutComponentBase
+@* EvokeConnect Care Management workbench: top brand bar + left side rail + auth context strip. *@
+
+<MudThemeProvider IsDarkMode="false" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="ec-shell">
+    <header class="ec-topbar">
+        <div class="ec-brand">
+            <div class="ec-brand-mark">
+                <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="ecg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#22d3ee" />
+                            <stop offset="100%" stop-color="#6366f1" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M16 2 L29 9 L29 23 L16 30 L3 23 L3 9 Z" fill="url(#ecg)" />
+                    <path d="M16 8 L23 12 L23 20 L16 24 L9 20 L9 12 Z" fill="#ffffff" />
+                </svg>
+                <span class="ec-brand-text">EvokeConnect</span>
+            </div>
+            <span class="ec-brand-tag">Care Management Workbench</span>
+        </div>
+
+        <nav class="ec-nav">
+            <a href="#"  class="ec-nav-item">Cases</a>
+            <a href="#"  class="ec-nav-item">Authorizations</a>
+            <a href="/demo" class="ec-nav-item active">Decision Review</a>
+            <a href="#"  class="ec-nav-item">Reports</a>
+        </nav>
+
+        <div class="ec-topbar-right">
+            <span class="ec-search">
+                <span class="material-symbols-rounded">search</span>
+                <input placeholder="Search members, authorizations…" />
+            </span>
+            <span class="ec-iconbtn" title="Notifications"><span class="material-symbols-rounded">notifications</span></span>
+            <span class="ec-iconbtn" title="Help"><span class="material-symbols-rounded">help</span></span>
+            <span class="ec-avatar" title="demo.user">DU</span>
+        </div>
+    </header>
+
+    <div class="ec-workspace">
+        <!-- Left rail with workbench sections -->
+        <nav class="ec-siderail">
+            <div class="ec-siderail-section">Authorization</div>
+            <a href="#"  class="ec-siderail-item"><span class="material-symbols-rounded">list_alt</span><span>List</span></a>
+            <a href="#"  class="ec-siderail-item"><span class="material-symbols-rounded">view_kanban</span><span>Summary</span></a>
+            <a href="#"  class="ec-siderail-item"><span class="material-symbols-rounded">edit_note</span><span>Entry</span></a>
+            <a href="/demo" class="ec-siderail-item active"><span class="material-symbols-rounded">gavel</span><span>Decisions</span></a>
+
+            <div class="ec-siderail-section" style="margin-top:14px;">Workspace</div>
+            <a href="#" class="ec-siderail-item"><span class="material-symbols-rounded">history_edu</span><span>Activities</span></a>
+            <a href="#" class="ec-siderail-item"><span class="material-symbols-rounded">sticky_note_2</span><span>Notes</span></a>
+            <a href="#" class="ec-siderail-item"><span class="material-symbols-rounded">folder</span><span>Documents</span></a>
+            <a href="#" class="ec-siderail-item"><span class="material-symbols-rounded">forum</span><span>Messages</span></a>
+            <a href="#" class="ec-siderail-item"><span class="material-symbols-rounded">help_center</span><span>Support</span></a>
+        </nav>
+
+        <main class="ec-content">
+            @Body
+        </main>
+    </div>
+</div>
