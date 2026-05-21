@@ -20,9 +20,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Source+Serif+Pro:ital,wght@1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" />
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
-    <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["MCGCareWEBQI.MockServer.styles.css"]" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="MCGCareWEBQI.MockServer.styles.css" />
     <style>
         /* --- Real-CareWebQI palette (matches actual MCG screenshots) --- */
         html, body { font-family: 'Source Sans Pro', Tahoma, Arial, sans-serif; background:#e8edf2; color:#212121; }
@@ -157,15 +156,14 @@
             border-top:1px dotted #b0bec5; margin-top:32px;
         }
     </style>
-    <ImportMap />
     <HeadOutlet />
 </head>
 
 <body>
     <Routes />
-    <ReconnectModal />
+    <div id="components-reconnect-modal"></div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>

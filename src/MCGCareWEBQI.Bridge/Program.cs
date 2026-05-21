@@ -98,12 +98,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/not-found");
 
 app.UseWebSockets();                // required so YARP can proxy Blazor SignalR
 app.MapReverseProxy();
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapReceiver();

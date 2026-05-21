@@ -43,7 +43,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/not-found");
 
 // When this server is fronted by the bridge's reverse proxy (dock-mode iframe),
 // YARP forwards an X-Mcg-Prefix header. Honor it so that NavigationManager,
@@ -57,7 +57,7 @@ app.Use((ctx, next) =>
     return next();
 });
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapInterfaceLogin();

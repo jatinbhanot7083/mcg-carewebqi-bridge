@@ -11,9 +11,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" />
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
-    <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["MCGCareWEBQI.Bridge.styles.css"]" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="MCGCareWEBQI.Bridge.styles.css" />
     <style>
         html, body { font-family: 'Inter', Roboto, Helvetica, Arial, sans-serif; background:#f6f8fb; color:#0f172a; margin:0; }
         code, pre { font-family: 'JetBrains Mono', Consolas, Menlo, monospace !important; }
@@ -234,15 +233,14 @@
         .ec-trace-section[open] summary::before { content:'▾ '; color:#5eead4; }
         .ec-trace-section pre { margin:0; padding:14px 18px; background:#0f172a; color:#5eead4; font-size:0.78rem; max-height:24rem; overflow:auto; white-space:pre-wrap; word-break:break-all; }
     </style>
-    <ImportMap />
     <HeadOutlet />
 </head>
 
 <body>
     <Routes />
-    <ReconnectModal />
+    <div id="components-reconnect-modal"></div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>

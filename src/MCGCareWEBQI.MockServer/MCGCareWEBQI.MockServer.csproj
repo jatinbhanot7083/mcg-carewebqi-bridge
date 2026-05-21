@@ -7,12 +7,12 @@
   <ItemGroup>
     <PackageReference Include="CoreWCF.Http" Version="1.9.0" />
     <PackageReference Include="CoreWCF.Primitives" Version="1.9.0" />
-    <PackageReference Include="MudBlazor" Version="9.4.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="MudBlazor" Version="8.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
   </ItemGroup>
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
