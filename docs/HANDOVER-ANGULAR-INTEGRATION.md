@@ -400,7 +400,7 @@ if (result && result.status === 'Acknowledged') { ... }
                   ▼             ▼
         evokeconnect.your   mcg-bridge.your
         -org.com            -org.com
-        (Angular SPA +      (this .NET 10 ASP.NET Core app)
+        (Angular SPA +      (this .NET 8 ASP.NET Core app)
          your .NET API)
                                 │
                                 ▼

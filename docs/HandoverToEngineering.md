@@ -4,7 +4,7 @@
 
 Team,
 
-Handing over the MCG CareWebQI integration. It's a complete, working .NET 10 solution that bridges any host application (EvokeConnect today, others tomorrow) to MCG CareWebQI 12.0 — signed POST, episode round-trip, SOAP ACK, dock/popup/focus UI mechanics, and certification-script readiness all built in.
+Handing over the MCG CareWebQI integration. It's a complete, working .NET 8 solution that bridges any host application (EvokeConnect today, others tomorrow) to MCG CareWebQI 12.0 — signed POST, episode round-trip, SOAP ACK, dock/popup/focus UI mechanics, and certification-script readiness all built in.
 
 **Repository:** [https://github.com/jatinbhanot7083/mcg-carewebqi-bridge](https://github.com/jatinbhanot7083/mcg-carewebqi-bridge)
 
@@ -14,7 +14,7 @@ Private repo. I'll add each of you as a collaborator — please share your GitHu
 
 ## What's in the box
 
-- .NET 10 / C# bridge service with YARP reverse proxy, EF Core 10, CoreWCF
+- .NET 8 / C# bridge service with YARP reverse proxy, EF Core 8, CoreWCF
 - SQL Server schema + 12 passing unit tests
 - Mock MCG server for local development (replaced by real MCG via one config change when keys arrive)
 - Full documentation set in both Markdown and Word format (`docs/` folder + `README`)

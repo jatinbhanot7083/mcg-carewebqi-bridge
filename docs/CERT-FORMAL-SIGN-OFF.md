@@ -42,7 +42,7 @@ Confirm with your MCG Technical Support contact that the following are configure
 
 | Item | Status | Initial |
 |---|---|---|
-| Bridge running on `net10.0`, all unit tests green | ☐ | ___ |
+| Bridge running on `net8.0`, all unit tests green | ☐ | ___ |
 | YARP reverse proxy configured to upstream MCG tenant | ☐ | ___ |
 | `Mcg:LoginKey` sourced from secret store (not source control) | ☐ | ___ |
 | `Bridge:AllowedCallerOrigins` set to explicit caller origins (not `*`) | ☐ | ___ |

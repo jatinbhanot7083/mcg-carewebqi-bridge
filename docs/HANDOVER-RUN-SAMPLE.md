@@ -9,13 +9,14 @@ Install once, machine-wide:
 
 | Tool | Why | Verify |
 |---|---|---|
-| **.NET 10 SDK** | Builds + runs the solution. | `dotnet --list-sdks` shows `10.0.x` |
+| **.NET 8 SDK** | Builds + runs the solution. | `dotnet --list-sdks` shows `8.0.x` |
 | **SQL Server LocalDB** | Bridge persists `IntegrationTransaction` rows here. Comes free with SQL Server Express or Visual Studio. | `sqllocaldb info` shows `MSSQLLocalDB` |
 | **Git** | Clone the repo. | `git --version` |
 | **Visual Studio 2022 17.x or VS Code** (optional) | For IDE debugging. CLI works fine too. | — |
 | **Chrome / Edge** (latest) | Browser to drive the demo. Required for dock/popup/focus features. | — |
 
-The solution targets `net10.0` exclusively. .NET 8 / .NET 9 won't compile it.
+The solution targets `net8.0`. A `global.json` at the repo root pins the SDK to
+the 8.0 band (`rollForward: latestFeature`), so any installed `8.0.x` SDK builds it.
 
 ## 2. Get the code
 
@@ -121,7 +122,7 @@ You should see one row per launch with `Status='Acknowledged'`.
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `dotnet --list-sdks` doesn't show 10.0.x | .NET 10 not installed | Install from <https://dotnet.microsoft.com> |
+| `dotnet --list-sdks` doesn't show 8.0.x | .NET 8 not installed | Install from <https://dotnet.microsoft.com> |
 | `Cannot open server '(localdb)\MSSQLLocalDB'` | LocalDB not running | `sqllocaldb start MSSQLLocalDB` |
 | Bridge launch fails with `Login failed for user` | DB was dropped | Re-run step 4 |
 | `port 7080 already in use` | Old MockServer still running | `Get-Process MCGCareWEBQI* \| Stop-Process` |

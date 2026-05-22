@@ -1,8 +1,8 @@
-# MCGCareWEBQI Interface — .NET 10 rebuild
+# MCGCareWEBQI Interface — .NET 8 rebuild
 
 A modernized, application-agnostic bridge between any third-party system and
 **MCG CareWebQI 12.0**. Originally written in 2010 on ASP.NET Web Forms +
-EntitySpaces; rewritten on .NET 10, ASP.NET Core (Blazor Server + minimal API),
+EntitySpaces; rewritten on .NET 8, ASP.NET Core (Blazor Server + minimal API),
 Entity Framework Core, CoreWCF, and MudBlazor.
 
 > **Design philosophy.** The bridge has **zero compile-time coupling** to any
@@ -16,7 +16,7 @@ Entity Framework Core, CoreWCF, and MudBlazor.
 | Project | Purpose |
 |---|---|
 | [`src/MCGCareWEBQI.Shared`](src/MCGCareWEBQI.Shared) | Hash helper, CwqiMessage POCOs, config models, request builders. No I/O. |
-| [`src/MCGCareWEBQI.Data`](src/MCGCareWEBQI.Data) | EF Core 10 DbContext + entities (`IntegrationTransaction`, `IntegrationAudit`). |
+| [`src/MCGCareWEBQI.Data`](src/MCGCareWEBQI.Data) | EF Core 8 DbContext + entities (`IntegrationTransaction`, `IntegrationAudit`). |
 | [`src/MCGCareWEBQI.Bridge`](src/MCGCareWEBQI.Bridge) | The bridge itself. Blazor Server + minimal API. Replaces the old Web Forms project. |
 | [`src/MCGCareWEBQI.MockServer`](src/MCGCareWEBQI.MockServer) | Stand-in for real MCG CareWebQI. Hosts `interfacelogin.aspx` + CoreWCF `Reconcile.asmx`. Swap with real MCG via config. |
 | [`tests/MCGCareWEBQI.Tests`](tests/MCGCareWEBQI.Tests) | xUnit unit tests (12 tests, all passing). |
@@ -119,17 +119,17 @@ the CareWebQI 12.0 Developer's Guide.
 - **Caller-specific business-object DLLs.** Original code linked to compiled
   EntitySpaces-based DLLs from the prior host application. The new design doesn't
   write into any caller's tables — it owns its own `IntegrationTransaction` table only.
-- **EntitySpaces.** Replaced with EF Core 10 / LINQ.
+- **EntitySpaces.** Replaced with EF Core 8 / LINQ.
 - **ASP.NET Web Forms.** Replaced with Blazor Server + minimal API.
 - **Pixel-perfect MCG UI.** Mock UI is functional and labeled correctly. When you
   send screenshots, we can match the layout.
 
 ## Stack
 
-- .NET 10 (`net10.0`)
-- ASP.NET Core 10, Blazor Server (interactive)
-- Entity Framework Core 10 + SQL Server (LocalDB for dev)
+- .NET 8 (`net8.0`) — SDK pinned via `global.json` (`rollForward: latestFeature`)
+- ASP.NET Core 8, Blazor Server (interactive)
+- Entity Framework Core 8 + SQL Server (LocalDB for dev)
 - CoreWCF 1.x for SOAP server (`Reconcile.asmx`)
-- MudBlazor 9.4 for UI components (Material 3)
+- MudBlazor 8.0 for UI components
 - Serilog for logging (console + rolling file in `logs/`)
 - xUnit for tests
